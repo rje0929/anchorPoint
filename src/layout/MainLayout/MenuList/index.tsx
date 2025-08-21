@@ -15,7 +15,6 @@ import { MenuOrientation } from 'config';
 import menuItem from 'menu-items';
 import useConfig from 'hooks/useConfig';
 
-import { Menu } from 'menu-items/widget';
 import { HORIZONTAL_MAX_ITEM } from 'config';
 import { useGetMenu, useGetMenuMaster } from 'api/menu';
 

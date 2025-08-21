@@ -1,17 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 // material-ui
-import AppBar from '@mui/material/AppBar';
 import IconButton from '@mui/material/IconButton';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Paper from '@mui/material/Paper';
-import Popper from '@mui/material/Popper';
-import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
-
-// project imports
-import LocalizationSection from '../LocalizationSection';
-import Transitions from 'ui-component/extended/Transitions';
 
 // assets
 import { IconDotsVertical } from '@tabler/icons-react';
@@ -28,14 +19,6 @@ export default function MobileSection() {
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleClose = (event: MouseEvent | TouchEvent) => {
-    if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
-    }
-
-    setOpen(false);
   };
 
   const prevOpen = useRef(open);
@@ -59,40 +42,6 @@ export default function MobileSection() {
           />
         </IconButton>
       </Box>
-
-      <Popper
-        placement="bottom-end"
-        open={open}
-        anchorEl={anchorRef.current}
-        role={undefined}
-        transition
-        disablePortal
-        style={{ width: '100%', zIndex: 1 }}
-        modifiers={[
-          {
-            name: 'offset',
-            options: {
-              offset: [0, 30]
-            }
-          }
-        ]}
-      >
-        {({ TransitionProps }) => (
-          <ClickAwayListener onClickAway={handleClose}>
-            <Transitions type="zoom" in={open} {...TransitionProps} sx={{ transformOrigin: 'top right' }}>
-              <Paper>
-                {open && (
-                  <AppBar color="inherit">
-                    <Toolbar sx={{ py: 2.75 }}>
-                      <LocalizationSection />
-                    </Toolbar>
-                  </AppBar>
-                )}
-              </Paper>
-            </Transitions>
-          </ClickAwayListener>
-        )}
-      </Popper>
     </>
   );
 }
