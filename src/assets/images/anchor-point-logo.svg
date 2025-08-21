@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" width="900" height="360" role="img" aria-labelledby="title desc">
+  <title>Anchor Point — Lighthouse Logo</title>
+  <desc>Minimalist lighthouse with waves and the text "ANCHOR POINT" to the right. Clean, modern style.</desc>
+
+  <!-- Colors -->
+  <defs>
+    <style>
+      .ink { fill: none; stroke: #0f3554; stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
+      .fill { fill: #0f3554; }
+      .text { fill: #0f3554; font-family: Inter, Helvetica, Arial, sans-serif; font-weight: 800; letter-spacing: 1px; }
+    </style>
+  </defs>
+
+  <!-- Logo mark: Lighthouse + waves -->
+  <g id="mark" transform="translate(40,40)">
+    <!-- base waves -->
+    <path class="ink" d="M10,230c40,-35 110,-35 150,0" />
+    <path class="ink" d="M70,250c40,-35 110,-35 150,0" />
+
+    <!-- lighthouse body -->
+    <path class="ink" d="M140,210 L140,120 L170,80 L200,120 L200,210 Z" />
+
+    <!-- tower stripes -->
+    <path class="ink" d="M145,170 L195,140" />
+    <path class="ink" d="M145,195 L195,165" />
+
+    <!-- lantern room -->
+    <path class="ink" d="M155,80 L190,80" />
+    <path class="ink" d="M150,95 L195,95" />
+    <path class="ink" d="M160,95 L160,115 M175,95 L175,115 M190,95 L190,115" />
+
+    <!-- roof -->
+    <path class="ink" d="M145,70 L173,52 L203,70 Z" />
+
+    <!-- light beams -->
+    <path class="ink" d="M210,110 L270,95" />
+    <path class="ink" d="M210,120 L270,120" />
+  </g>
+
+  <!-- Wordmark -->
+  <g id="wordmark" transform="translate(360,122)">
+    <text class="text" font-size="84">
+      <tspan x="0" y="0">ANCHOR</tspan>
+      <tspan x="0" y="96">POINT</tspan>
+    </text>
+  </g>
+</svg>
