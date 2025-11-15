@@ -1,0 +1,226 @@
+[
+	{
+		"nonprofitName": "Abolition NC",
+		"businessType": [
+			"Nonprofit"
+		],
+		"regionsServed": [
+			"Statewide",
+			"National"
+		],
+		"websites": [
+			"http://abolitionnc.org",
+			"http://freewaync.org"
+		],
+		"description": "Partnering to combat human trafficking through awareness and prevention. AbolitionNC has an awareness and prevention human trafficking student curriculum designed to align with requirements for 7th, 8th, and 9th grade health classes in NC. It includes training for facilitators. AbolitionNC provides an online school staff training module on child sexual abuse and child trafficking that aligns with the NC legal requirements and includes tracking and technical support. AbolitionNC has a documentary called, \"Bring to Light: Unveiling Truth about Human Trafficking\" which is available for showing at NC events.",
+		"contactInformation": [
+			{
+				"officePhone": "336-298-2208",
+				"generalEmail": "Connect@AbolitionNC.org",
+				"crisisHotline": ""
+			}
+		],
+		"contacts": [
+			{
+				"primaryContact": "Meg Williams",
+				"description": "Director of Community Engagement",
+				"phone": "336-298-2208",
+				"email": "Connect@AbolitionNC.org"
+			}
+		],
+		"servicesOffered": {
+			"available247": false,
+			"serviceCategories": [
+				"Education/Training"
+			],
+			"description": "",
+			"languagesAvailable": [
+				"English"
+			],
+			"translationServices": true,
+			"feesAndPaymentOptions": [
+				"Free"
+			]
+		},
+		"demographics": [
+			"Adults",
+			"Children/Youth",
+			"Families",
+			"Immigrants/Refugees",
+			"People with Disabilities",
+			"Indigenous",
+			"Populations",
+			"All Genders",
+			"Female-Identifying",
+			"Male-Identifying",
+			"LGBTQIA+"
+		],
+		"specificPopulations": [
+			"We primarily serve schools, youth organizations, and the general community"
+		],
+		"collaborationAndPartnerships": [
+			"Triad Rapid Response Team",
+			"NCCAHT",
+			"Churches",
+			"School Districts in NC",
+			"Independent Schools",
+			"Various organizations in NC and beyond"
+		],
+		"trainingAndEducation": {
+			"workshopsAndTrainingOffered": true,
+			"topicsCovered": [
+				"Curriculum for Youth",
+				"School Staff Training",
+				"Community Training through our documentary showings"
+			],
+			"targetAudience": [
+				"Educators",
+				"Community Members"
+			],
+			"trainingFormat": [
+				"In-Person",
+				"Virtual"
+			]
+		},
+		"survivorLeadershipAndMentorship": true,
+		"accessibilityAndInclusion": {}
+	},
+	{
+		"nonprofitName": "Compassion to Act",
+		"businessType": [
+			"Nonprofit"
+		],
+		"regionsServed": [
+			"Statewide"
+		],
+		"websites": [
+			"http://www.compassiontoact.org"
+		],
+		"description": "",
+		"contactInformation": [
+			{
+				"officePhone": "704-288-7230",
+				"generalEmail": "info@compassiontoact.org",
+				"crisisHotline": "980-319-9595"
+			}
+		],
+		"contacts": [
+			{
+				"primaryContact": "Debbie Gates",
+				"description": "President/Founder",
+				"phone": "704-819-7749",
+				"email": "debbie@compassionact.org"
+			}
+		],
+		"servicesOffered": {
+			"available247": true,
+			"serviceCategories": [
+				"Advocacy", "Education/Training", "Long-Term Restorative Housing"
+			],
+			"languagesAvailable": [
+				"English", "Spanish"
+			],
+			"description": "",
+			"translationServices": true,
+			"feesAndPaymentOptions": [
+				"Free"
+			]
+		},
+		"demographics": [
+			"Adults (Women)"
+		],
+		"specificPopulations": [
+			"Domestic Survivors",
+			"Sex Trafficking Survivors"
+		],
+		"collaborationAndPartnerships": [
+			""
+		],
+		"trainingAndEducation": {
+			"workshopsAndTrainingOffered": true,
+			"topicsCovered": [],
+			"targetAudience": [
+				"Law Enforcement", "Medical Professionals", "Mental Health Providers", "Educators", "Community Members"
+			],
+			"trainingFormat": [
+				"In-Person"
+			]
+		},
+		"survivorLeadershipAndMentorship": false,
+		"accessibilityAndInclusion": {
+			"adaCompliant": true,
+			"disabilityAccomadations": true
+		}
+	},
+	{
+		"nonprofitName": "Creative Counseling and Learning Solutions, PPLC/Dandelion Turtles",
+		"businessType": [
+			"Nonprofit",
+			"Mental Health Provider",
+			"Other"
+		],
+		"regionsServed": [
+			"Statewide", "National", "International"
+		],
+		"websites": [
+			"http://www.ccandls.org"
+		],
+		"description": "No matter where you are in life, we can help! We offer a wide variety of counseling and support services to people of all ages and backgrounds! From friendly talk to complex trauma, we will meet you where you are and develop a healthy relationship so that we can develop the tools to help you be the best you!",
+		"contactInformation": [
+			{
+				"officePhone": "980-581-8144",
+				"generalEmail": "laurah@myccls.com",
+				"crisisHotline": ""
+			}
+		],
+		"contacts": [
+			{
+				"primaryContact": "Laura RM Harbeson",
+				"description": "Executive Clinical Director",
+				"phone": "704-322-1143",
+				"email": "laurah@myccls.com"
+			}
+		],
+		"servicesOffered": {
+			"available247": true,
+			"description": "At Creative Counseling and Learning Solutions, we offer Outpatient Trauma-Informed Therapy and Advocacy for all of our clients (including those that have experienced human trafficking). At Dandelion Turtles we will provide a residential therapeutic treatment facility for minors whom are victims of human trafficking, and/or sexual exploitation, Advocacy, Case Management, Crisis Support, Trainings, and etc",
+			"serviceCategories": [
+				"Crisis Response/Intervention", "Case Management", "Advocacy", "Mental Health Services", "Shelter/Housing Assistance", "Legal Aid", "Education/Training", "Survivor-Mentorship/Leadership", "Emergency/Safe House", "Long-Term Restorative Housing"
+			],
+			"languagesAvailable": [
+				"English"
+			],
+			"translationServices": true,
+			"feesAndPaymentOptions": [
+				"Free"
+			]
+		},
+		"demographics": [
+			"Adults", "Children/Youth", "Families", "Immigrants/Refugees", "People with Disabilities", "Indigenous Populations", "All Genders", "Female-Identifying", "Male-Identifying", "LGBTQIA+"
+		],
+		"specificPopulations": [
+			"Domestic Survivors", "International Survivors", "Labor Trafficking Survivors", "Sex Trafficking Survivors", "Dual Exploitation (Labor/Sex)", "Runaway/Unhoused Youth"
+		],
+		"collaborationAndPartnerships": [
+			"FBI", "US Attorney's Office", "Local Law Enforcement", "District Attorneys", "Pediatricians", "School Systems", "Juvenile Justice", "Department of Social Services", "Esther House", "Atrium Health", "Butterfly House CAC", "Dandelion Turtles"
+		],
+		"trainingAndEducation": {
+			"workshopsAndTrainingOffered": true,
+			"topicsCovered": [
+				"Complex Trauma; Therapeutic Considerations for working with victims of complex trauma (including human trafficking); Human Trafficking 101; The Interrelationship Between Substance Use Disorders and Human Trafficking; and more based on request"
+			],
+			"targetAudience": [
+				"Law Enforcement", "Medical Professionals", "Mental Health Providers", "Educators", "Social Workers", "Community Members", "Survivors"
+			],
+			"trainingFormat": [
+				"In-Person",
+				"Virtual"
+			]
+		},
+		"survivorLeadershipAndMentorship": true,
+		"accessibilityAndInclusion": {
+			"adaCompliant": true,
+			"disabilityAccomadations": true
+		}
+	}
+]

@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Provider {
+  id                                Int                              @id @default(autoincrement())
+  nonprofitName                     String
+  businessType                      String[]
+  regionsServed                     String[]
+  websites                          String[]
+  description                       String                           @db.Text
+  demographics                      String[]
+  specificPopulations               String[]
+  collaborationAndPartnerships      String[]
+  survivorLeadershipAndMentorship   Boolean                          @default(false)
+  createdAt                         DateTime                         @default(now())
+  updatedAt                         DateTime                         @updatedAt
+
+  contactInformation                ContactInformation[]
+  contacts                          Contact[]
+  servicesOffered                   ServicesOffered?
+  trainingAndEducation              TrainingAndEducation?
+  accessibilityAndInclusion         AccessibilityAndInclusion?
+
+  @@index([nonprofitName])
+}
+
+model ContactInformation {
+  id             String    @id @default(uuid())
+  officePhone    String?
+  generalEmail   String?
+  crisisHotline  String?
+  providerId     Int
+  provider       Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+}
+
+model Contact {
+  id              String    @id @default(uuid())
+  primaryContact  String
+  description     String    @db.Text
+  phone           String?
+  email           String?
+  providerId      Int
+  provider        Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([providerId])
+}
+
+model ServicesOffered {
+  id                      String    @id @default(uuid())
+  available247            Boolean   @default(false)
+  serviceCategories       String[]
+  languagesAvailable      String[]
+  description             String    @db.Text
+  translationServices     Boolean   @default(false)
+  feesAndPaymentOptions   String[]
+  providerId              Int       @unique
+  provider                Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+}
+
+model TrainingAndEducation {
+  id                         String    @id @default(uuid())
+  workshopsAndTrainingOffered Boolean  @default(false)
+  topicsCovered              String[]
+  targetAudience             String[]
+  trainingFormat             String[]
+  providerId                 Int       @unique
+  provider                   Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+}
+
+model AccessibilityAndInclusion {
+  id                       String    @id @default(uuid())
+  adaCompliant             Boolean   @default(false)
+  disabilityAccomadations  Boolean   @default(false)
+  providerId               Int       @unique
+  provider                 Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+}

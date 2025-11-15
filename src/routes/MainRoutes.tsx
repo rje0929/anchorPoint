@@ -5,12 +5,7 @@ import MainLayout from 'layout/MainLayout';
 import ErrorBoundary from './ErrorBoundary';
 import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
-
-import { loader as productsLoader, productLoader } from 'api/products';
-
-// dashboard routing
-const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
-const DashboardAnalytics = Loadable(lazy(() => import('views/dashboard/Analytics')));
+import Providers from 'views/dashboard/providers';
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -23,12 +18,8 @@ const MainRoutes = {
   ),
   children: [
     {
-      path: '/dashboard/default',
-      element: <DashboardDefault />
-    },
-    {
-      path: '/dashboard/analytics',
-      element: <DashboardAnalytics />
+      path: '/dashboard/providers',
+      element: <Providers />
     }
   ]
 };

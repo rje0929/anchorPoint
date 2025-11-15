@@ -11,8 +11,6 @@ import SimpleRoutes from './SimpleRoutes';
 import Loadable from 'ui-component/Loadable';
 import Login from 'views/pages/authentication/Login';
 
-const PagesLanding = Loadable(lazy(() => import('views/pages/landing')));
-
 // ==============================|| ROUTING RENDER ||============================== //
 
 const router = createBrowserRouter([{ path: '/', element: <Login /> }, AuthenticationRoutes, LoginRoutes, SimpleRoutes, MainRoutes], {

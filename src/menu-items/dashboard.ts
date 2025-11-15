@@ -21,10 +21,10 @@ const dashboard: NavItemType = {
   type: 'group',
   children: [
     {
-      id: 'default',
-      title: 'default',
+      id: 'providers',
+      title: 'Providers',
       type: 'item',
-      url: '/dashboard/default',
+      url: '/dashboard/providers',
       icon: icons.IconDashboard,
       breadcrumbs: false
     },
