@@ -3,10 +3,8 @@ import React from 'react';
 // material-ui
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import InputAdornment from '@mui/material/InputAdornment';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import Pagination from '@mui/material/Pagination';
 import Typography from '@mui/material/Typography';
 
