@@ -2,24 +2,57 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { PrismaClient } from '../src/generated/prisma';
+import { createClient } from '@supabase/supabase-js';
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3010;
 
+// Initialize Supabase client for JWT verification
+const supabaseUrl = process.env.VITE_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
 app.use(cors());
 app.use(express.json());
+
+// JWT verification middleware
+const verifyToken = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+
+  const token = authHeader.replace('Bearer ', '');
+
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+
+    // Attach user to request object for use in route handlers
+    (req as any).user = user;
+    next();
+  } catch (error) {
+    console.error('Token verification error:', error);
+    return res.status(401).json({ error: 'Authentication failed' });
+  }
+};
 
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Get all providers
-app.get('/api/providers', async (req, res) => {
+// Get all providers (protected route)
+app.get('/api/providers', verifyToken, async (req, res) => {
   try {
     const providers = await prisma.provider.findMany({
       include: {
+        address: true,
         contactInformation: true,
         contacts: true,
         servicesOffered: true,
@@ -37,13 +70,14 @@ app.get('/api/providers', async (req, res) => {
   }
 });
 
-// Get provider by ID
-app.get('/api/providers/:id', async (req, res) => {
+// Get provider by ID (protected route)
+app.get('/api/providers/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const provider = await prisma.provider.findUnique({
       where: { id: parseInt(id) },
       include: {
+        address: true,
         contactInformation: true,
         contacts: true,
         servicesOffered: true,
@@ -63,12 +97,13 @@ app.get('/api/providers/:id', async (req, res) => {
   }
 });
 
-// Create provider
-app.post('/api/providers', async (req, res) => {
+// Create provider (protected route - admin only)
+app.post('/api/providers', verifyToken, async (req, res) => {
   try {
     const provider = await prisma.provider.create({
       data: req.body,
       include: {
+        address: true,
         contactInformation: true,
         contacts: true,
         servicesOffered: true,
@@ -83,14 +118,15 @@ app.post('/api/providers', async (req, res) => {
   }
 });
 
-// Update provider
-app.put('/api/providers/:id', async (req, res) => {
+// Update provider (protected route - admin only)
+app.put('/api/providers/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const provider = await prisma.provider.update({
       where: { id: parseInt(id) },
       data: req.body,
       include: {
+        address: true,
         contactInformation: true,
         contacts: true,
         servicesOffered: true,
@@ -105,8 +141,8 @@ app.put('/api/providers/:id', async (req, res) => {
   }
 });
 
-// Delete provider
-app.delete('/api/providers/:id', async (req, res) => {
+// Delete provider (protected route - admin only)
+app.delete('/api/providers/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.provider.delete({

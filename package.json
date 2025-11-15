@@ -30,7 +30,7 @@
     "@mui/x-tree-view": "8.1.0",
     "@prisma/client": "^6.19.0",
     "@reduxjs/toolkit": "2.7.0",
-    "@supabase/supabase-js": "2.49.4",
+    "@supabase/supabase-js": "^2.49.4",
     "@tabler/icons-react": "3.31.0",
     "@types/react-map-gl": "6.1.7",
     "@vitejs/plugin-react": "4.4.1",

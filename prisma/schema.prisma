@@ -26,6 +26,7 @@ model Provider {
   createdAt                         DateTime                         @default(now())
   updatedAt                         DateTime                         @updatedAt
 
+  address                           Address?
   contactInformation                ContactInformation[]
   contacts                          Contact[]
   servicesOffered                   ServicesOffered?
@@ -86,4 +87,14 @@ model AccessibilityAndInclusion {
   disabilityAccomadations  Boolean   @default(false)
   providerId               Int       @unique
   provider                 Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+}
+
+model Address {
+  id             String    @id @default(uuid())
+  streetAddress  String
+  city           String
+  state          String
+  zipCode        String
+  providerId     Int       @unique
+  provider       Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }

@@ -11,6 +11,14 @@ export type Provider = {
   survivorLeadershipAndMentorship: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
+  address?: {
+    id: string;
+    streetAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    providerId: number;
+  } | null;
   contactInformation?: {
     id: string;
     officePhone?: string | null;

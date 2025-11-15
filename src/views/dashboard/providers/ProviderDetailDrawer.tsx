@@ -81,6 +81,24 @@ const ProviderDetailDrawer: React.FC<ProviderDetailDrawerProps> = ({ open, onClo
           </Box>
         )}
 
+        {/* Address */}
+        {provider.address && (
+          <Box mb={3}>
+            <Typography variant="h6" gutterBottom>
+              <LocationOnIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+              Address
+            </Typography>
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="body2">{provider.address.streetAddress}</Typography>
+                <Typography variant="body2">
+                  {provider.address.city}, {provider.address.state} {provider.address.zipCode}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+        )}
+
         {/* Websites */}
         {provider.websites && provider.websites.length > 0 && (
           <Box mb={3}>
