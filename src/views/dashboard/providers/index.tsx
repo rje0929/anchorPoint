@@ -35,19 +35,7 @@ export default function Providers() {
       title={
         <Grid container spacing={gridSpacing} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Grid>
-            <Typography variant="h3">List</Typography>
-          </Grid>
-          <Grid>
-            <OutlinedInput
-              id="input-search-list-style1"
-              placeholder="Search"
-              startAdornment={
-                <InputAdornment position="start">
-                  <IconSearch stroke={1.5} size="16px" />
-                </InputAdornment>
-              }
-              size="small"
-            />
+            <Typography variant="h3">Anchor Point Providers</Typography>
           </Grid>
         </Grid>
       }
