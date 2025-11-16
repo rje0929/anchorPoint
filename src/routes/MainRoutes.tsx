@@ -2,10 +2,9 @@ import { lazy } from 'react';
 
 // project imports
 import MainLayout from 'layout/MainLayout';
-import ErrorBoundary from './ErrorBoundary';
-import Loadable from 'ui-component/Loadable';
 import AuthGuard from 'utils/route-guard/AuthGuard';
 import Providers from 'views/dashboard/providers';
+import ProviderMap from 'views/dashboard/providers/ProviderMap';
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -20,6 +19,10 @@ const MainRoutes = {
     {
       path: '/dashboard/providers',
       element: <Providers />
+    },
+    {
+      path: '/dashboard/provider-map',
+      element: <ProviderMap />
     }
   ]
 };

@@ -1,19 +1,12 @@
 import { useMemo, useEffect, useReducer, useCallback, ReactElement, createContext } from 'react';
 
-// third party
-import { createClient } from '@supabase/supabase-js';
-
 // project imports
+import { supabase } from '../lib/supabase';
 import accountReducer from 'store/accountReducer';
 import { LOGIN, LOGOUT } from 'store/actions';
 
 // types
 import { InitialLoginContextProps, SupabaseContextType } from 'types/auth';
-
-// supabase initialize
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // const
 const initialState: InitialLoginContextProps = {

@@ -16,7 +16,7 @@ import menuItem from 'menu-items';
 import useConfig from 'hooks/useConfig';
 
 import { HORIZONTAL_MAX_ITEM } from 'config';
-import { useGetMenu, useGetMenuMaster } from 'api/menu';
+import { useGetMenuMaster } from 'api/menu';
 
 // types
 import { NavItemType } from 'types';
@@ -27,7 +27,6 @@ function MenuList() {
   const downMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
 
   const { menuOrientation } = useConfig();
-  const { menuLoading } = useGetMenu();
   const { menuMaster } = useGetMenuMaster();
   const drawerOpen = menuMaster.isDashboardDrawerOpened;
   const isHorizontal = menuOrientation === MenuOrientation.HORIZONTAL && !downMD;
@@ -38,7 +37,7 @@ function MenuList() {
   useLayoutEffect(() => {
     setMenuItems({ items: [...menuItem.items] });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menuLoading]);
+  }, []);
 
   // last menu-item to show in horizontal menu bar
   const lastItem = isHorizontal ? HORIZONTAL_MAX_ITEM : null;
