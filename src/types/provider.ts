@@ -17,6 +17,8 @@ export type Provider = {
     city: string;
     state: string;
     zipCode: string;
+    latitude?: number | null;
+    longitude?: number | null;
     providerId: number;
   } | null;
   contactInformation?: {

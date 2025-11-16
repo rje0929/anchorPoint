@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 
 // project imports
 import LogoSection from '../LogoSection';
-import SearchSection from './SearchSection';
 import MobileSection from './MobileSection';
 import ProfileSection from './ProfileSection';
 import FullScreenSection from './FullScreenSection';
@@ -59,9 +58,6 @@ export default function Header() {
         )}
       </Box>
 
-      {/* header search */}
-      <SearchSection />
-      <Box sx={{ flexGrow: 1 }} />
       <Box sx={{ flexGrow: 1 }} />
 
       {/* full sceen toggler */}

@@ -10,6 +10,14 @@ import CardContent from '@mui/material/CardContent';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import GlobalStyles from '@mui/material/GlobalStyles';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Chip from '@mui/material/Chip';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
@@ -41,6 +49,10 @@ export default function ProviderMap() {
   const [error, setError] = useState<string | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<ProviderWithCoordinates | null>(null);
   const [viewState, setViewState] = useState(NC_CENTER);
+  const [selectedDemographics, setSelectedDemographics] = useState<string[]>([]);
+  const [selectedBusinessTypes, setSelectedBusinessTypes] = useState<string[]>([]);
+  const [availableDemographics, setAvailableDemographics] = useState<string[]>([]);
+  const [availableBusinessTypes, setAvailableBusinessTypes] = useState<string[]>([]);
 
   useEffect(() => {
     loadProviders();
@@ -51,10 +63,22 @@ export default function ProviderMap() {
       setLoading(true);
       const data = await providerService.getAllProviders();
 
-      // Geocode addresses to get coordinates
+      // Use stored coordinates or geocode if needed
       const providersWithCoords = await Promise.all(
         data.map(async (provider) => {
           if (provider.address) {
+            // Check if we already have stored coordinates
+            if (provider.address.latitude && provider.address.longitude) {
+              return {
+                ...provider,
+                coordinates: {
+                  latitude: provider.address.latitude,
+                  longitude: provider.address.longitude
+                }
+              };
+            }
+
+            // Only geocode if we don't have stored coordinates
             const { streetAddress, city, state, zipCode } = provider.address;
             const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
 
@@ -66,6 +90,10 @@ export default function ProviderMap() {
 
               if (geocodeData.features && geocodeData.features.length > 0) {
                 const [longitude, latitude] = geocodeData.features[0].center;
+
+                // TODO: Consider updating the backend to store these coordinates
+                console.log(`Geocoded ${provider.nonprofitName}: ${latitude}, ${longitude}`);
+
                 return {
                   ...provider,
                   coordinates: { latitude, longitude }
@@ -81,12 +109,54 @@ export default function ProviderMap() {
 
       setProviders(providersWithCoords);
       setError(null);
+
+      // Extract unique demographics and business types for filters
+      const demographicsSet = new Set<string>();
+      const businessTypesSet = new Set<string>();
+
+      providersWithCoords.forEach((provider) => {
+        provider.demographics?.forEach((demo) => demographicsSet.add(demo));
+        provider.businessType?.forEach((type) => businessTypesSet.add(type));
+      });
+
+      setAvailableDemographics(Array.from(demographicsSet).sort());
+      setAvailableBusinessTypes(Array.from(businessTypesSet).sort());
     } catch (err) {
       console.error('Failed to load providers:', err);
       setError('Failed to load providers. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter providers based on selected criteria
+  const filteredProviders = providers.filter((provider) => {
+    // Filter by demographics
+    if (selectedDemographics.length > 0) {
+      const hasMatchingDemo = provider.demographics?.some((demo) => selectedDemographics.includes(demo));
+      if (!hasMatchingDemo) return false;
+    }
+
+    // Filter by business type
+    if (selectedBusinessTypes.length > 0) {
+      const hasMatchingType = provider.businessType?.some((type) => selectedBusinessTypes.includes(type));
+      if (!hasMatchingType) return false;
+    }
+
+    return true;
+  });
+
+  const handleClearFilters = () => {
+    setSelectedDemographics([]);
+    setSelectedBusinessTypes([]);
+  };
+
+  const handleRemoveDemographic = (demographic: string) => {
+    setSelectedDemographics(selectedDemographics.filter(d => d !== demographic));
+  };
+
+  const handleRemoveBusinessType = (businessType: string) => {
+    setSelectedBusinessTypes(selectedBusinessTypes.filter(t => t !== businessType));
   };
 
   if (loading) {
@@ -107,10 +177,108 @@ export default function ProviderMap() {
     );
   }
 
-  const providersWithLocations = providers.filter(p => p.coordinates);
+  const providersWithLocations = filteredProviders.filter(p => p.coordinates);
+
+  const hasActiveFilters = selectedDemographics.length > 0 || selectedBusinessTypes.length > 0;
 
   return (
     <MainCard title="Provider Map">
+      {/* Filter Controls */}
+      <Box sx={{ mb: 2, p: 2, backgroundColor: 'background.default', borderRadius: 1 }}>
+        <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+          <Grid size={{ xs: 12, sm: 5 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Demographics</InputLabel>
+              <Select
+                multiple
+                value={selectedDemographics}
+                onChange={(e) => setSelectedDemographics(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
+                input={<OutlinedInput label="Demographics" />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((value) => (
+                      <Chip key={value} label={value} size="small" />
+                    ))}
+                  </Box>
+                )}
+              >
+                {availableDemographics.map((demo) => (
+                  <MenuItem key={demo} value={demo}>
+                    {demo}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 5 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Business Type</InputLabel>
+              <Select
+                multiple
+                value={selectedBusinessTypes}
+                onChange={(e) => setSelectedBusinessTypes(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
+                input={<OutlinedInput label="Business Type" />}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((value) => (
+                      <Chip key={value} label={value} size="small" />
+                    ))}
+                  </Box>
+                )}
+              >
+                {availableBusinessTypes.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 2 }}>
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={handleClearFilters}
+              disabled={!hasActiveFilters}
+              size="small"
+            >
+              Clear Filters
+            </Button>
+          </Grid>
+        </Grid>
+
+        {/* Active Filters Display */}
+        {hasActiveFilters && (
+          <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            <Typography variant="body2" sx={{ mr: 1, alignSelf: 'center', fontWeight: 600 }}>
+              Active Filters:
+            </Typography>
+            {selectedDemographics.map((demo) => (
+              <Chip
+                key={`demo-${demo}`}
+                label={demo}
+                onDelete={() => handleRemoveDemographic(demo)}
+                color="primary"
+                size="small"
+                variant="outlined"
+              />
+            ))}
+            {selectedBusinessTypes.map((type) => (
+              <Chip
+                key={`type-${type}`}
+                label={type}
+                onDelete={() => handleRemoveBusinessType(type)}
+                color="secondary"
+                size="small"
+                variant="outlined"
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
+
       <GlobalStyles
         styles={{
           '.mapboxgl-popup-content': {
@@ -240,7 +408,10 @@ export default function ProviderMap() {
           }}
         >
           <Typography variant="body2">
-            <strong>{providersWithLocations.length}</strong> of <strong>{providers.length}</strong> providers shown on map
+            Showing <strong>{providersWithLocations.length}</strong> of <strong>{filteredProviders.length}</strong> filtered
+            {hasActiveFilters && (
+              <> ({providers.length} total)</>
+            )}
           </Typography>
         </Box>
       </Box>

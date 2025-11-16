@@ -95,6 +95,8 @@ model Address {
   city           String
   state          String
   zipCode        String
+  latitude       Float?
+  longitude      Float?
   providerId     Int       @unique
   provider       Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }
