@@ -8,12 +8,12 @@ export type Provider = {
   demographics: string[];
   specificPopulations: string[];
   collaborationAndPartnerships: string[];
-  survivorLeadershipAndMentorship: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
   address?: {
     id: string;
-    streetAddress: string;
+    streetAddress1: string;
+    streetAddress2?: string | null;
     city: string;
     state: string;
     zipCode: string;
@@ -46,6 +46,20 @@ export type Provider = {
     feesAndPaymentOptions: string[];
     providerId: number;
   } | null;
+  crisisAndShelterServices?: {
+    id: string;
+    immediateCrisisResponse: boolean;
+    responseTime: string;
+    emergencyShelter: boolean;
+    emergencyShelterInfo: string;
+    providerId: number;
+  } | null;
+  survivorLeadershipAndMentorship?: {
+    id: string;
+    survivorsInLeadership: boolean;
+    peerMentorshipProgram: boolean;
+    providerId: number;
+  } | null;
   trainingAndEducation?: {
     id: string;
     workshopsAndTrainingOffered: boolean;
@@ -57,7 +71,8 @@ export type Provider = {
   accessibilityAndInclusion?: {
     id: string;
     adaCompliant: boolean;
-    disabilityAccomadations: boolean;
+    disabilityAccommodations: boolean;
+    culturallyResponsiveServices: boolean;
     providerId: number;
   } | null;
 };

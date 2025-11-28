@@ -13,90 +13,111 @@ datasource db {
 }
 
 model Provider {
-  id                                Int                              @id @default(autoincrement())
-  nonprofitName                     String
-  businessType                      String[]
-  regionsServed                     String[]
-  websites                          String[]
-  description                       String                           @db.Text
-  demographics                      String[]
-  specificPopulations               String[]
-  collaborationAndPartnerships      String[]
-  survivorLeadershipAndMentorship   Boolean                          @default(false)
-  createdAt                         DateTime                         @default(now())
-  updatedAt                         DateTime                         @updatedAt
+  id                           Int      @id @default(autoincrement())
+  nonprofitName                String
+  businessType                 String[]
+  regionsServed                String[]
+  websites                     String[]
+  description                  String   @db.Text
+  demographics                 String[]
+  specificPopulations          String[]
+  collaborationAndPartnerships String[]
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
 
-  address                           Address?
-  contactInformation                ContactInformation[]
-  contacts                          Contact[]
-  servicesOffered                   ServicesOffered?
-  trainingAndEducation              TrainingAndEducation?
-  accessibilityAndInclusion         AccessibilityAndInclusion?
+  address                         Address?
+  contactInformation              ContactInformation[]
+  contacts                        Contact[]
+  servicesOffered                 ServicesOffered?
+  crisisAndShelterServices        CrisisAndShelterServices?
+  survivorLeadershipAndMentorship SurvivorLeadershipAndMentorship?
+  trainingAndEducation            TrainingAndEducation?
+  accessibilityAndInclusion       AccessibilityAndInclusion?
 
   @@index([nonprofitName])
 }
 
 model ContactInformation {
-  id             String    @id @default(uuid())
-  officePhone    String?
-  generalEmail   String?
-  crisisHotline  String?
-  providerId     Int
-  provider       Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  id            String   @id @default(uuid())
+  officePhone   String?
+  generalEmail  String?
+  crisisHotline String?
+  providerId    Int
+  provider      Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   @@index([providerId])
 }
 
 model Contact {
-  id              String    @id @default(uuid())
-  primaryContact  String
-  description     String    @db.Text
-  phone           String?
-  email           String?
-  providerId      Int
-  provider        Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid())
+  primaryContact String
+  description    String   @db.Text
+  phone          String?
+  email          String?
+  providerId     Int
+  provider       Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   @@index([providerId])
 }
 
 model ServicesOffered {
-  id                      String    @id @default(uuid())
-  available247            Boolean   @default(false)
-  serviceCategories       String[]
-  languagesAvailable      String[]
-  description             String    @db.Text
-  translationServices     Boolean   @default(false)
-  feesAndPaymentOptions   String[]
-  providerId              Int       @unique
-  provider                Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  id                    String   @id @default(uuid())
+  available247          Boolean  @default(false)
+  serviceCategories     String[]
+  languagesAvailable    String[]
+  description           String   @db.Text
+  translationServices   Boolean  @default(false)
+  feesAndPaymentOptions String[]
+  providerId            Int      @unique
+  provider              Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+}
+
+model CrisisAndShelterServices {
+  id                      String   @id @default(uuid())
+  immediateCrisisResponse Boolean  @default(false)
+  responseTime            String   @db.Text
+  emergencyShelter        Boolean  @default(false)
+  emergencyShelterInfo    String   @db.Text
+  providerId              Int      @unique
+  provider                Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }
 
 model TrainingAndEducation {
-  id                         String    @id @default(uuid())
+  id                          String   @id @default(uuid())
   workshopsAndTrainingOffered Boolean  @default(false)
-  topicsCovered              String[]
-  targetAudience             String[]
-  trainingFormat             String[]
-  providerId                 Int       @unique
-  provider                   Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  topicsCovered               String[]
+  targetAudience              String[]
+  trainingFormat              String[]
+  providerId                  Int      @unique
+  provider                    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }
 
 model AccessibilityAndInclusion {
-  id                       String    @id @default(uuid())
-  adaCompliant             Boolean   @default(false)
-  disabilityAccomadations  Boolean   @default(false)
-  providerId               Int       @unique
-  provider                 Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  id                           String   @id @default(uuid())
+  adaCompliant                 Boolean  @default(false)
+  disabilityAccommodations     Boolean  @default(false)
+  culturallyResponsiveServices Boolean  @default(false)
+  providerId                   Int      @unique
+  provider                     Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+}
+
+model SurvivorLeadershipAndMentorship {
+  id                    String   @id @default(uuid())
+  survivorsInLeadership Boolean  @default(false)
+  peerMentorshipProgram Boolean  @default(false)
+  providerId            Int      @unique
+  provider              Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }
 
 model Address {
-  id             String    @id @default(uuid())
-  streetAddress  String
+  id             String   @id @default(uuid())
+  streetAddress1 String
+  streetAddress2 String?
   city           String
   state          String
   zipCode        String
   latitude       Float?
   longitude      Float?
-  providerId     Int       @unique
-  provider       Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  providerId     Int      @unique
+  provider       Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }

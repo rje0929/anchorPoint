@@ -19,7 +19,6 @@ async function main() {
         demographics: providerData.demographics || [],
         specificPopulations: providerData.specificPopulations || [],
         collaborationAndPartnerships: providerData.collaborationAndPartnerships || [],
-        survivorLeadershipAndMentorship: providerData.survivorLeadershipAndMentorship || false,
 
         // Create related contact information
         contactInformation: {
@@ -66,6 +65,43 @@ async function main() {
             }
           : undefined,
 
+        // Create address if available
+        address: providerData.address
+          ? {
+              create: {
+                streetAddress1: providerData.address.streetAddress1 || '',
+                streetAddress2: providerData.address.streetAddress2 || null,
+                city: providerData.address.city || '',
+                state: providerData.address.state || 'NC',
+                zipCode: providerData.address.zipCode || '',
+              },
+            }
+          : undefined,
+
+        // Create crisis and shelter services if available
+        crisisAndShelterServices: providerData.crisisAndShelterServices
+          ? {
+              create: {
+                immediateCrisisResponse: providerData.crisisAndShelterServices.immediateCrisisResponse || false,
+                responseTime: providerData.crisisAndShelterServices.responseTime || '',
+                emergencyShelter: providerData.crisisAndShelterServices.emergencyShelter || false,
+                emergencyShelterInfo: providerData.crisisAndShelterServices.emergencyShelterInfo || '',
+              },
+            }
+          : undefined,
+
+        // Create survivor leadership and mentorship if available
+        survivorLeadershipAndMentorship:
+          providerData.survivorLeadershipAndMentorship &&
+          typeof providerData.survivorLeadershipAndMentorship === 'object'
+            ? {
+                create: {
+                  survivorsInLeadership: providerData.survivorLeadershipAndMentorship.survivorsInLeadership || false,
+                  peerMentorshipProgram: providerData.survivorLeadershipAndMentorship.peerMentorshipProgram || false,
+                },
+              }
+            : undefined,
+
         // Create accessibility and inclusion if available
         accessibilityAndInclusion:
           providerData.accessibilityAndInclusion &&
@@ -73,7 +109,8 @@ async function main() {
             ? {
                 create: {
                   adaCompliant: providerData.accessibilityAndInclusion.adaCompliant || false,
-                  disabilityAccomadations: providerData.accessibilityAndInclusion.disabilityAccomadations || false,
+                  disabilityAccommodations: providerData.accessibilityAndInclusion.disabilityAccommodations || false,
+                  culturallyResponsiveServices: providerData.accessibilityAndInclusion.culturallyResponsiveServices || false,
                 },
               }
             : undefined,

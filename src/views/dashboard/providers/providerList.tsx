@@ -247,8 +247,7 @@ export default function ProviderList() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ pl: 3 }}>#</TableCell>
-              <TableCell>Provider Name</TableCell>
+              <TableCell sx={{ pl: 3 }}>Provider Name</TableCell>
               <TableCell>Business Type</TableCell>
               <TableCell>Contact</TableCell>
               <TableCell>Regions Served</TableCell>
@@ -261,8 +260,7 @@ export default function ProviderList() {
             {filteredData && filteredData.length > 0 ? (
               filteredData.map((row) => (
                 <TableRow hover key={row.id}>
-                  <TableCell sx={{ pl: 3 }}>{row.id}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ pl: 3 }}>
                     <Stack direction="column" spacing={0.5}>
                       <Typography variant="subtitle2" noWrap>
                         {row.nonprofitName}
@@ -326,7 +324,7 @@ export default function ProviderList() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={6} align="center">
                   <Typography variant="body2" color="text.secondary">
                     {searchQuery || selectedBusinessTypes.length > 0 || selectedRegions.length > 0
                       ? 'No providers match your filters'

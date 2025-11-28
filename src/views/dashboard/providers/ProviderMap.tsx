@@ -79,8 +79,8 @@ export default function ProviderMap() {
             }
 
             // Only geocode if we don't have stored coordinates
-            const { streetAddress, city, state, zipCode } = provider.address;
-            const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
+            const { streetAddress1, streetAddress2, city, state, zipCode } = provider.address;
+            const fullAddress = `${streetAddress1}${streetAddress2 ? ' ' + streetAddress2 : ''}, ${city}, ${state} ${zipCode}`;
 
             try {
               // Use Mapbox Geocoding API
@@ -191,9 +191,10 @@ export default function ProviderMap() {
               <InputLabel>Demographics</InputLabel>
               <Select
                 multiple
+                size="small"
                 value={selectedDemographics}
                 onChange={(e) => setSelectedDemographics(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
-                input={<OutlinedInput label="Demographics" />}
+                input={<OutlinedInput label="Demographics" size="small" />}
                 renderValue={(selected) => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                     {selected.map((value) => (
@@ -216,9 +217,10 @@ export default function ProviderMap() {
               <InputLabel>Business Type</InputLabel>
               <Select
                 multiple
+                size="small"
                 value={selectedBusinessTypes}
                 onChange={(e) => setSelectedBusinessTypes(typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)}
-                input={<OutlinedInput label="Business Type" />}
+                input={<OutlinedInput label="Business Type" size="small" />}
                 renderValue={(selected) => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                     {selected.map((value) => (
@@ -359,8 +361,13 @@ export default function ProviderMap() {
                   {selectedProvider.address && (
                     <Box sx={{ mb: 1 }}>
                       <Typography variant="body2" color="text.secondary">
-                        {selectedProvider.address.streetAddress}
+                        {selectedProvider.address.streetAddress1}
                       </Typography>
+                      {selectedProvider.address.streetAddress2 && (
+                        <Typography variant="body2" color="text.secondary">
+                          {selectedProvider.address.streetAddress2}
+                        </Typography>
+                      )}
                       <Typography variant="body2" color="text.secondary">
                         {selectedProvider.address.city}, {selectedProvider.address.state} {selectedProvider.address.zipCode}
                       </Typography>

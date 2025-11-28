@@ -24,6 +24,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AccessibleIcon from '@mui/icons-material/Accessible';
 import SchoolIcon from '@mui/icons-material/School';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 
 // types
 import { Provider } from '../../../types/provider';
@@ -90,7 +91,10 @@ const ProviderDetailDrawer: React.FC<ProviderDetailDrawerProps> = ({ open, onClo
             </Typography>
             <Card variant="outlined">
               <CardContent>
-                <Typography variant="body2">{provider.address.streetAddress}</Typography>
+                <Typography variant="body2">{provider.address.streetAddress1}</Typography>
+                {provider.address.streetAddress2 && (
+                  <Typography variant="body2">{provider.address.streetAddress2}</Typography>
+                )}
                 <Typography variant="body2">
                   {provider.address.city}, {provider.address.state} {provider.address.zipCode}
                 </Typography>
@@ -273,6 +277,42 @@ const ProviderDetailDrawer: React.FC<ProviderDetailDrawerProps> = ({ open, onClo
           </Box>
         )}
 
+        {/* Crisis & Shelter Services */}
+        {provider.crisisAndShelterServices && (
+          <Box mb={3}>
+            <Typography variant="h6" gutterBottom>
+              <LocalHospitalIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+              Crisis & Shelter Services
+            </Typography>
+            <Card variant="outlined">
+              <CardContent>
+                <Stack spacing={2}>
+                  {provider.crisisAndShelterServices.immediateCrisisResponse && (
+                    <Box>
+                      <Chip label="Immediate Crisis Response Available" size="small" color="error" />
+                      {provider.crisisAndShelterServices.responseTime && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                          Response Time: {provider.crisisAndShelterServices.responseTime}
+                        </Typography>
+                      )}
+                    </Box>
+                  )}
+                  {provider.crisisAndShelterServices.emergencyShelter && (
+                    <Box>
+                      <Chip label="Emergency Shelter Available" size="small" color="warning" />
+                      {provider.crisisAndShelterServices.emergencyShelterInfo && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                          {provider.crisisAndShelterServices.emergencyShelterInfo}
+                        </Typography>
+                      )}
+                    </Box>
+                  )}
+                </Stack>
+              </CardContent>
+            </Card>
+          </Box>
+        )}
+
         {/* Demographics & Populations */}
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, mb: 3 }}>
           {provider.demographics && provider.demographics.length > 0 && (
@@ -370,8 +410,11 @@ const ProviderDetailDrawer: React.FC<ProviderDetailDrawerProps> = ({ open, onClo
                   {provider.accessibilityAndInclusion.adaCompliant && (
                     <Chip label="ADA Compliant" size="small" color="success" />
                   )}
-                  {provider.accessibilityAndInclusion.disabilityAccomadations && (
+                  {provider.accessibilityAndInclusion.disabilityAccommodations && (
                     <Chip label="Disability Accommodations Available" size="small" color="success" />
+                  )}
+                  {provider.accessibilityAndInclusion.culturallyResponsiveServices && (
+                    <Chip label="Culturally Responsive Services" size="small" color="success" />
                   )}
                 </Stack>
               </CardContent>
@@ -395,10 +438,24 @@ const ProviderDetailDrawer: React.FC<ProviderDetailDrawerProps> = ({ open, onClo
           </Box>
         )}
 
-        {/* Survivor Leadership */}
+        {/* Survivor Leadership & Mentorship */}
         {provider.survivorLeadershipAndMentorship && (
           <Box mb={3}>
-            <Chip label="Survivor Leadership & Mentorship Programs Available" color="primary" />
+            <Typography variant="h6" gutterBottom>
+              Survivor Leadership & Mentorship
+            </Typography>
+            <Card variant="outlined">
+              <CardContent>
+                <Stack spacing={1}>
+                  {provider.survivorLeadershipAndMentorship.survivorsInLeadership && (
+                    <Chip label="Survivors in Leadership Roles" size="small" color="primary" />
+                  )}
+                  {provider.survivorLeadershipAndMentorship.peerMentorshipProgram && (
+                    <Chip label="Peer Mentorship Program Available" size="small" color="primary" />
+                  )}
+                </Stack>
+              </CardContent>
+            </Card>
           </Box>
         )}
 
