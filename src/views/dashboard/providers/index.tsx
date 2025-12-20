@@ -16,11 +16,14 @@ import { gridSpacing } from 'store/constant';
 import { IconSearch } from '@tabler/icons-react';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import ProviderList from './providerList';
+import AddIcon from '@mui/icons-material/Add';
 
 // ==============================|| USER LIST STYLE 1 ||============================== //
 
 export default function Providers() {
   const [anchorEl, setAnchorEl] = React.useState<Element | (() => Element) | null | undefined>(null);
+  const [showAddForm, setShowAddForm] = React.useState(false);
+
   const handleClick = (event: React.MouseEvent) => {
     setAnchorEl(event.currentTarget);
   };
@@ -28,6 +31,11 @@ export default function Providers() {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleAddProvider = () => {
+    setShowAddForm(true);
+  };
+
   return (
     <MainCard
       title={
@@ -35,45 +43,16 @@ export default function Providers() {
           <Grid>
             <Typography variant="h3">Anchor Point Providers</Typography>
           </Grid>
+          <Grid>
+            <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleAddProvider}>
+              Add New Provider
+            </Button>
+          </Grid>
         </Grid>
       }
       content={false}
     >
-      <ProviderList />
-      <Grid sx={{ p: 3 }} size={12}>
-        <Grid container spacing={gridSpacing} sx={{ justifyContent: 'space-between' }}>
-          <Grid>
-            <Pagination count={10} color="primary" />
-          </Grid>
-          <Grid>
-            <Button size="large" sx={{ color: 'grey.900' }} color="secondary" endIcon={<ExpandMoreRoundedIcon />} onClick={handleClick}>
-              10 Rows
-            </Button>
-            {anchorEl && (
-              <Menu
-                id="menu-user-list-style1"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                variant="selectedMenu"
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-              >
-                <MenuItem onClick={handleClose}> 10 Rows</MenuItem>
-                <MenuItem onClick={handleClose}> 20 Rows</MenuItem>
-                <MenuItem onClick={handleClose}> 30 Rows </MenuItem>
-              </Menu>
-            )}
-          </Grid>
-        </Grid>
-      </Grid>
+      <ProviderList showAddForm={showAddForm} setShowAddForm={setShowAddForm} />
     </MainCard>
   );
 }

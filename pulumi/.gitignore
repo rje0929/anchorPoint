@@ -1,0 +1,5 @@
+node_modules/
+bin/
+*.pem
+Pulumi.*.yaml
+.pulumi/

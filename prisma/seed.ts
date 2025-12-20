@@ -1,5 +1,5 @@
 import { PrismaClient } from '../src/generated/prisma';
-import seedData from './seed-data.json';
+import seedData from '../nonprofits.json';
 
 const prisma = new PrismaClient();
 

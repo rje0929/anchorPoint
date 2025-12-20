@@ -72,7 +72,6 @@ export default function MainLayout() {
           <Footer />
         </Container>
       </MainContentStyled>
-      <Customization />
     </Box>
   );
 }

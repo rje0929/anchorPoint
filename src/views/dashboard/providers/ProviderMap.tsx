@@ -11,6 +11,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import GlobalStyles from '@mui/material/GlobalStyles';
 import FormControl from '@mui/material/FormControl';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -18,14 +20,16 @@ import Chip from '@mui/material/Chip';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import PersonPinCircleIcon from '@mui/icons-material/PersonPinCircle';
+import SearchLocationIcon from '@mui/icons-material/Search';
 
 // project imports
 import MainCard from 'ui-component/cards/MainCard';
 import { providerService } from 'services/providerService';
 import { Provider } from 'types/provider';
-
-// assets
-import { IconMapPin } from '@tabler/icons-react';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_APP_MAPBOX_ACCESS_TOKEN;
 
@@ -53,6 +57,11 @@ export default function ProviderMap() {
   const [selectedBusinessTypes, setSelectedBusinessTypes] = useState<string[]>([]);
   const [availableDemographics, setAvailableDemographics] = useState<string[]>([]);
   const [availableBusinessTypes, setAvailableBusinessTypes] = useState<string[]>([]);
+  const [showEmergencyShelterOnly, setShowEmergencyShelterOnly] = useState(false);
+  const [showLongTermServicesOnly, setShowLongTermServicesOnly] = useState(false);
+  const [searchAddress, setSearchAddress] = useState('');
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [geocoding, setGeocoding] = useState(false);
 
   useEffect(() => {
     loadProviders();
@@ -143,12 +152,32 @@ export default function ProviderMap() {
       if (!hasMatchingType) return false;
     }
 
+    // Emergency shelter filter
+    if (showEmergencyShelterOnly) {
+      if (!provider.crisisAndShelterServices?.emergencyShelter) {
+        return false;
+      }
+    }
+
+    // Long-term services filter
+    if (showLongTermServicesOnly) {
+      const longTermCategories = ['Housing Assistance', 'Case Management', 'Employment Services', 'Education/Training'];
+      const hasLongTermServices = provider.servicesOffered?.serviceCategories.some(
+        (category) => longTermCategories.includes(category)
+      );
+      if (!hasLongTermServices) {
+        return false;
+      }
+    }
+
     return true;
   });
 
   const handleClearFilters = () => {
     setSelectedDemographics([]);
     setSelectedBusinessTypes([]);
+    setShowEmergencyShelterOnly(false);
+    setShowLongTermServicesOnly(false);
   };
 
   const handleRemoveDemographic = (demographic: string) => {
@@ -157,6 +186,39 @@ export default function ProviderMap() {
 
   const handleRemoveBusinessType = (businessType: string) => {
     setSelectedBusinessTypes(selectedBusinessTypes.filter(t => t !== businessType));
+  };
+
+  const handleSearchAddress = async () => {
+    if (!searchAddress.trim()) return;
+
+    try {
+      setGeocoding(true);
+      const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchAddress)}.json?access_token=${MAPBOX_TOKEN}&limit=1`;
+      const response = await fetch(geocodeUrl);
+      const data = await response.json();
+
+      if (data.features && data.features.length > 0) {
+        const [longitude, latitude] = data.features[0].center;
+        setUserLocation({ latitude, longitude });
+
+        // Center the map on the searched location
+        setViewState({
+          latitude,
+          longitude,
+          zoom: 12
+        });
+      }
+    } catch (err) {
+      console.error('Failed to geocode address:', err);
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
+  const handleClearUserLocation = () => {
+    setUserLocation(null);
+    setSearchAddress('');
+    setViewState(NC_CENTER);
   };
 
   if (loading) {
@@ -179,7 +241,7 @@ export default function ProviderMap() {
 
   const providersWithLocations = filteredProviders.filter(p => p.coordinates);
 
-  const hasActiveFilters = selectedDemographics.length > 0 || selectedBusinessTypes.length > 0;
+  const hasActiveFilters = selectedDemographics.length > 0 || selectedBusinessTypes.length > 0 || showEmergencyShelterOnly || showLongTermServicesOnly;
 
   return (
     <MainCard title="Provider Map">
@@ -251,6 +313,77 @@ export default function ProviderMap() {
           </Grid>
         </Grid>
 
+        {/* Address Search and Service Type Toggles */}
+        <Box sx={{ mt: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Address Search Input */}
+          <TextField
+            size="small"
+            placeholder="Enter address to locate..."
+            value={searchAddress}
+            onChange={(e) => setSearchAddress(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearchAddress();
+              }
+            }}
+            sx={{ flex: '1 1 300px', maxWidth: 400 }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchLocationIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+
+          {/* Address Search Buttons */}
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleSearchAddress}
+            disabled={!searchAddress.trim() || geocoding}
+          >
+            {geocoding ? 'Locating...' : 'Locate'}
+          </Button>
+          {userLocation && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleClearUserLocation}
+            >
+              Clear Location
+            </Button>
+          )}
+
+          {/* Service Type Toggles */}
+          <Box sx={{ display: 'flex', gap: 2, ml: 'auto', flexWrap: 'wrap' }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showEmergencyShelterOnly}
+                  onChange={(e) => setShowEmergencyShelterOnly(e.target.checked)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label="Emergency Shelter Available"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showLongTermServicesOnly}
+                  onChange={(e) => setShowLongTermServicesOnly(e.target.checked)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label="Long-Term Services Available"
+            />
+          </Box>
+        </Box>
+
         {/* Active Filters Display */}
         {hasActiveFilters && (
           <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -277,6 +410,24 @@ export default function ProviderMap() {
                 variant="outlined"
               />
             ))}
+            {showEmergencyShelterOnly && (
+              <Chip
+                label="Emergency Shelter Available"
+                onDelete={() => setShowEmergencyShelterOnly(false)}
+                color="primary"
+                size="small"
+                variant="outlined"
+              />
+            )}
+            {showLongTermServicesOnly && (
+              <Chip
+                label="Long-Term Services Available"
+                onDelete={() => setShowLongTermServicesOnly(false)}
+                color="primary"
+                size="small"
+                variant="outlined"
+              />
+            )}
           </Box>
         )}
       </Box>
@@ -299,6 +450,20 @@ export default function ProviderMap() {
               backgroundColor: 'rgba(0,0,0,0.05)',
               color: '#000'
             }
+          },
+          '@keyframes pulse': {
+            '0%': {
+              opacity: 1,
+              transform: 'scale(1)'
+            },
+            '50%': {
+              opacity: 0.8,
+              transform: 'scale(1.05)'
+            },
+            '100%': {
+              opacity: 1,
+              transform: 'scale(1)'
+            }
           }
         }}
       />
@@ -313,6 +478,25 @@ export default function ProviderMap() {
           {/* Navigation Controls */}
           <NavigationControl position="top-right" />
           <FullscreenControl position="top-right" />
+
+          {/* User Location Marker */}
+          {userLocation && (
+            <Marker
+              latitude={userLocation.latitude}
+              longitude={userLocation.longitude}
+              anchor="bottom"
+            >
+              <Box
+                sx={{
+                  color: '#4285F4', // Google blue
+                  filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.4))',
+                  animation: 'pulse 2s infinite'
+                }}
+              >
+                <PersonPinCircleIcon sx={{ fontSize: 50 }} />
+              </Box>
+            </Marker>
+          )}
 
           {/* Provider Markers */}
           {providersWithLocations.map((provider) => (
@@ -329,15 +513,16 @@ export default function ProviderMap() {
               <Box
                 sx={{
                   cursor: 'pointer',
-                  color: 'primary.main',
+                  color: '#ea4335', // Google red
+                  filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.4))',
                   '&:hover': {
-                    color: 'primary.dark',
                     transform: 'scale(1.2)',
+                    filter: 'drop-shadow(0px 4px 8px rgba(0,0,0,0.6))',
                     transition: 'all 0.2s'
                   }
                 }}
               >
-                <IconMapPin size={32} />
+                <LocationOnIcon sx={{ fontSize: 40 }} />
               </Box>
             </Marker>
           ))}

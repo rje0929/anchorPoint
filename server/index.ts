@@ -104,8 +104,123 @@ app.get('/api/providers/:id', verifyToken, async (req, res) => {
 // Create provider (protected route - admin only)
 app.post('/api/providers', verifyToken, async (req, res) => {
   try {
+    const {
+      address,
+      contactInformation,
+      contacts,
+      servicesOffered,
+      crisisAndShelterServices,
+      survivorLeadershipAndMentorship,
+      trainingAndEducation,
+      accessibilityAndInclusion,
+      nonprofitName,
+      description,
+      businessType,
+      regionsServed,
+      websites,
+      demographics,
+      specificPopulations,
+      collaborationAndPartnerships,
+    } = req.body;
+
     const provider = await prisma.provider.create({
-      data: req.body,
+      data: {
+        nonprofitName,
+        description,
+        businessType,
+        regionsServed,
+        websites,
+        demographics,
+        specificPopulations,
+        collaborationAndPartnerships,
+        // Create address
+        address: address
+          ? {
+              create: {
+                streetAddress1: address.streetAddress1 || '',
+                streetAddress2: address.streetAddress2 || null,
+                city: address.city || '',
+                state: address.state || 'NC',
+                zipCode: address.zipCode || '',
+              },
+            }
+          : undefined,
+        // Create contact information
+        contactInformation: contactInformation
+          ? {
+              create: contactInformation.map((contact: any) => ({
+                officePhone: contact.officePhone || null,
+                generalEmail: contact.generalEmail || null,
+                crisisHotline: contact.crisisHotline || null,
+              })),
+            }
+          : undefined,
+        // Create contacts
+        contacts: contacts
+          ? {
+              create: contacts.map((contact: any) => ({
+                primaryContact: contact.primaryContact,
+                description: contact.description,
+                phone: contact.phone || null,
+                email: contact.email || null,
+              })),
+            }
+          : undefined,
+        // Create services offered
+        servicesOffered: servicesOffered
+          ? {
+              create: {
+                available247: servicesOffered.available247 || false,
+                serviceCategories: servicesOffered.serviceCategories || [],
+                languagesAvailable: servicesOffered.languagesAvailable || [],
+                description: servicesOffered.description || '',
+                translationServices: servicesOffered.translationServices || false,
+                feesAndPaymentOptions: servicesOffered.feesAndPaymentOptions || [],
+              },
+            }
+          : undefined,
+        // Create crisis and shelter services
+        crisisAndShelterServices: crisisAndShelterServices
+          ? {
+              create: {
+                immediateCrisisResponse: crisisAndShelterServices.immediateCrisisResponse || false,
+                responseTime: crisisAndShelterServices.responseTime || '',
+                emergencyShelter: crisisAndShelterServices.emergencyShelter || false,
+                emergencyShelterInfo: crisisAndShelterServices.emergencyShelterInfo || '',
+              },
+            }
+          : undefined,
+        // Create survivor leadership and mentorship
+        survivorLeadershipAndMentorship: survivorLeadershipAndMentorship
+          ? {
+              create: {
+                survivorsInLeadership: survivorLeadershipAndMentorship.survivorsInLeadership || false,
+                peerMentorshipProgram: survivorLeadershipAndMentorship.peerMentorshipProgram || false,
+              },
+            }
+          : undefined,
+        // Create training and education
+        trainingAndEducation: trainingAndEducation
+          ? {
+              create: {
+                workshopsAndTrainingOffered: trainingAndEducation.workshopsAndTrainingOffered || false,
+                topicsCovered: trainingAndEducation.topicsCovered || [],
+                targetAudience: trainingAndEducation.targetAudience || [],
+                trainingFormat: trainingAndEducation.trainingFormat || [],
+              },
+            }
+          : undefined,
+        // Create accessibility and inclusion
+        accessibilityAndInclusion: accessibilityAndInclusion
+          ? {
+              create: {
+                adaCompliant: accessibilityAndInclusion.adaCompliant || false,
+                disabilityAccommodations: accessibilityAndInclusion.disabilityAccommodations || false,
+                culturallyResponsiveServices: accessibilityAndInclusion.culturallyResponsiveServices || false,
+              },
+            }
+          : undefined,
+      },
       include: {
         address: true,
         contactInformation: true,
@@ -128,9 +243,179 @@ app.post('/api/providers', verifyToken, async (req, res) => {
 app.put('/api/providers/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
+    const {
+      id: _id,
+      createdAt,
+      updatedAt,
+      address,
+      contactInformation,
+      contacts,
+      servicesOffered,
+      crisisAndShelterServices,
+      survivorLeadershipAndMentorship,
+      trainingAndEducation,
+      accessibilityAndInclusion,
+      nonprofitName,
+      description,
+      businessType,
+      regionsServed,
+      websites,
+      demographics,
+      specificPopulations,
+      collaborationAndPartnerships,
+    } = req.body;
+
+    const updateData = {
+      nonprofitName,
+      description,
+      businessType,
+      regionsServed,
+      websites,
+      demographics,
+      specificPopulations,
+      collaborationAndPartnerships,
+      // Update address using upsert
+      address: address
+        ? {
+            upsert: {
+              create: {
+                streetAddress1: address.streetAddress1 || '',
+                streetAddress2: address.streetAddress2 || null,
+                city: address.city || '',
+                state: address.state || 'NC',
+                zipCode: address.zipCode || '',
+              },
+              update: {
+                streetAddress1: address.streetAddress1 || '',
+                streetAddress2: address.streetAddress2 || null,
+                city: address.city || '',
+                state: address.state || 'NC',
+                zipCode: address.zipCode || '',
+              },
+            },
+          }
+        : undefined,
+      // Update contact information
+      contactInformation: contactInformation
+        ? {
+            deleteMany: {},
+            create: contactInformation.map((contact: any) => ({
+              officePhone: contact.officePhone,
+              generalEmail: contact.generalEmail,
+              crisisHotline: contact.crisisHotline,
+            })),
+          }
+        : undefined,
+      // Update contacts
+      contacts: contacts
+        ? {
+            deleteMany: {},
+            create: contacts.map((contact: any) => ({
+              primaryContact: contact.primaryContact,
+              description: contact.description,
+              phone: contact.phone,
+              email: contact.email,
+            })),
+          }
+        : undefined,
+      // Update services offered
+      servicesOffered: servicesOffered
+        ? {
+            upsert: {
+              create: {
+                available247: servicesOffered.available247,
+                serviceCategories: servicesOffered.serviceCategories,
+                languagesAvailable: servicesOffered.languagesAvailable,
+                description: servicesOffered.description,
+                translationServices: servicesOffered.translationServices,
+                feesAndPaymentOptions: servicesOffered.feesAndPaymentOptions,
+              },
+              update: {
+                available247: servicesOffered.available247,
+                serviceCategories: servicesOffered.serviceCategories,
+                languagesAvailable: servicesOffered.languagesAvailable,
+                description: servicesOffered.description,
+                translationServices: servicesOffered.translationServices,
+                feesAndPaymentOptions: servicesOffered.feesAndPaymentOptions,
+              },
+            },
+          }
+        : undefined,
+      // Update crisis and shelter services
+      crisisAndShelterServices: crisisAndShelterServices
+        ? {
+            upsert: {
+              create: {
+                immediateCrisisResponse: crisisAndShelterServices.immediateCrisisResponse,
+                responseTime: crisisAndShelterServices.responseTime,
+                emergencyShelter: crisisAndShelterServices.emergencyShelter,
+                emergencyShelterInfo: crisisAndShelterServices.emergencyShelterInfo,
+              },
+              update: {
+                immediateCrisisResponse: crisisAndShelterServices.immediateCrisisResponse,
+                responseTime: crisisAndShelterServices.responseTime,
+                emergencyShelter: crisisAndShelterServices.emergencyShelter,
+                emergencyShelterInfo: crisisAndShelterServices.emergencyShelterInfo,
+              },
+            },
+          }
+        : undefined,
+      // Update survivor leadership and mentorship
+      survivorLeadershipAndMentorship: survivorLeadershipAndMentorship
+        ? {
+            upsert: {
+              create: {
+                survivorsInLeadership: survivorLeadershipAndMentorship.survivorsInLeadership,
+                peerMentorshipProgram: survivorLeadershipAndMentorship.peerMentorshipProgram,
+              },
+              update: {
+                survivorsInLeadership: survivorLeadershipAndMentorship.survivorsInLeadership,
+                peerMentorshipProgram: survivorLeadershipAndMentorship.peerMentorshipProgram,
+              },
+            },
+          }
+        : undefined,
+      // Update training and education
+      trainingAndEducation: trainingAndEducation
+        ? {
+            upsert: {
+              create: {
+                workshopsAndTrainingOffered: trainingAndEducation.workshopsAndTrainingOffered,
+                topicsCovered: trainingAndEducation.topicsCovered,
+                targetAudience: trainingAndEducation.targetAudience,
+                trainingFormat: trainingAndEducation.trainingFormat,
+              },
+              update: {
+                workshopsAndTrainingOffered: trainingAndEducation.workshopsAndTrainingOffered,
+                topicsCovered: trainingAndEducation.topicsCovered,
+                targetAudience: trainingAndEducation.targetAudience,
+                trainingFormat: trainingAndEducation.trainingFormat,
+              },
+            },
+          }
+        : undefined,
+      // Update accessibility and inclusion
+      accessibilityAndInclusion: accessibilityAndInclusion
+        ? {
+            upsert: {
+              create: {
+                adaCompliant: accessibilityAndInclusion.adaCompliant,
+                disabilityAccommodations: accessibilityAndInclusion.disabilityAccommodations,
+                culturallyResponsiveServices: accessibilityAndInclusion.culturallyResponsiveServices,
+              },
+              update: {
+                adaCompliant: accessibilityAndInclusion.adaCompliant,
+                disabilityAccommodations: accessibilityAndInclusion.disabilityAccommodations,
+                culturallyResponsiveServices: accessibilityAndInclusion.culturallyResponsiveServices,
+              },
+            },
+          }
+        : undefined,
+    };
+
     const provider = await prisma.provider.update({
       where: { id: parseInt(id) },
-      data: req.body,
+      data: updateData,
       include: {
         address: true,
         contactInformation: true,
