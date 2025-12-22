@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 // material-ui
 import { Theme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import Divider from '@mui/material/Divider';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -81,21 +80,6 @@ export default function Login() {
                     </Grid>
                   </Grid>
                   <Grid size={12}>{AuthLoginComponent && <AuthLoginComponent />}</Grid>
-                  <Grid size={12}>
-                    <Divider />
-                  </Grid>
-                  <Grid size={12}>
-                    <Grid container direction="column" sx={{ alignItems: 'center' }} size={12}>
-                      <Typography
-                        component={Link}
-                        to={isLoggedIn ? '/pages/register/register3' : authParam ? `/register?auth=${authParam}` : '/register'}
-                        variant="subtitle1"
-                        sx={{ textDecoration: 'none' }}
-                      >
-                        Don&apos;t have an account?
-                      </Typography>
-                    </Grid>
-                  </Grid>
                 </Grid>
               </AuthCardWrapper>
               {!isLoggedIn && (

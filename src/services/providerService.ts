@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Provider } from '../types/provider';
+import { Provider, CreateProvider } from '../types/provider';
 import { supabase } from '../lib/supabase';
 
 // Remove trailing slash from API URL if present
@@ -31,7 +31,7 @@ export const providerService = {
     return response.data;
   },
 
-  async createProvider(provider: Omit<Provider, 'id'>): Promise<Provider> {
+  async createProvider(provider: CreateProvider): Promise<Provider> {
     const headers = await getAuthHeaders();
     const response = await axios.post(`${API_URL}/api/providers`, provider, { headers });
     return response.data;

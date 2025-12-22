@@ -355,13 +355,12 @@ export default function ProviderEditForm({ provider, onCancel, onSaveSuccess, on
             fullWidth
             value={formData.contactInformation?.[0]?.officePhone || ''}
             onChange={(e) => {
-              const contact = formData.contactInformation?.[0] || {};
+              const contact = formData.contactInformation?.[0];
               const updatedContact = {
-                ...contact,
-                id: contact.id || '',
+                id: contact?.id || '',
                 officePhone: e.target.value,
-                generalEmail: contact.generalEmail || null,
-                crisisHotline: contact.crisisHotline || null,
+                generalEmail: contact?.generalEmail || null,
+                crisisHotline: contact?.crisisHotline || null,
                 providerId: provider?.id || 0,
               };
               setFormData({
@@ -378,13 +377,12 @@ export default function ProviderEditForm({ provider, onCancel, onSaveSuccess, on
             type="email"
             value={formData.contactInformation?.[0]?.generalEmail || ''}
             onChange={(e) => {
-              const contact = formData.contactInformation?.[0] || {};
+              const contact = formData.contactInformation?.[0];
               const updatedContact = {
-                ...contact,
-                id: contact.id || '',
-                officePhone: contact.officePhone || null,
+                id: contact?.id || '',
+                officePhone: contact?.officePhone || null,
                 generalEmail: e.target.value,
-                crisisHotline: contact.crisisHotline || null,
+                crisisHotline: contact?.crisisHotline || null,
                 providerId: provider?.id || 0,
               };
               setFormData({
@@ -400,12 +398,11 @@ export default function ProviderEditForm({ provider, onCancel, onSaveSuccess, on
             fullWidth
             value={formData.contactInformation?.[0]?.crisisHotline || ''}
             onChange={(e) => {
-              const contact = formData.contactInformation?.[0] || {};
+              const contact = formData.contactInformation?.[0];
               const updatedContact = {
-                ...contact,
-                id: contact.id || '',
-                officePhone: contact.officePhone || null,
-                generalEmail: contact.generalEmail || null,
+                id: contact?.id || '',
+                officePhone: contact?.officePhone || null,
+                generalEmail: contact?.generalEmail || null,
                 crisisHotline: e.target.value,
                 providerId: provider?.id || 0,
               };

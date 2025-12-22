@@ -57,7 +57,7 @@ export default function SupabaseLogin({ ...others }) {
   const [searchParams] = useSearchParams();
   const authParam = searchParams.get('auth');
 
-  const handleClose = (_event: any, reason: string) => {
+  const handleClose = (_event?: any, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }

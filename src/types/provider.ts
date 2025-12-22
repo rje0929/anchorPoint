@@ -76,3 +76,15 @@ export type Provider = {
     providerId: number;
   } | null;
 };
+
+// Type for creating a new provider - excludes auto-generated fields
+export type CreateProvider = Omit<Provider, 'id' | 'createdAt' | 'updatedAt'> & {
+  address?: Omit<NonNullable<Provider['address']>, 'id' | 'providerId'> | null;
+  contactInformation?: Omit<NonNullable<Provider['contactInformation']>[number], 'id' | 'providerId'>[];
+  contacts?: Omit<NonNullable<Provider['contacts']>[number], 'id' | 'providerId'>[];
+  servicesOffered?: Omit<NonNullable<Provider['servicesOffered']>, 'id' | 'providerId'> | null;
+  crisisAndShelterServices?: Omit<NonNullable<Provider['crisisAndShelterServices']>, 'id' | 'providerId'> | null;
+  survivorLeadershipAndMentorship?: Omit<NonNullable<Provider['survivorLeadershipAndMentorship']>, 'id' | 'providerId'> | null;
+  trainingAndEducation?: Omit<NonNullable<Provider['trainingAndEducation']>, 'id' | 'providerId'> | null;
+  accessibilityAndInclusion?: Omit<NonNullable<Provider['accessibilityAndInclusion']>, 'id' | 'providerId'> | null;
+};

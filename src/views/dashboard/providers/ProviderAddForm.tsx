@@ -115,7 +115,7 @@ export default function ProviderAddForm({ onCancel, onSaveSuccess }: ProviderAdd
       setSaving(true);
       setSaveError(null);
 
-      await providerService.createProvider(formData);
+      await providerService.createProvider(formData as any);
 
       setSuccess(true);
       setTimeout(() => {
