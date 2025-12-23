@@ -1,5 +1,3 @@
-import { lazy } from 'react';
-
 // project imports
 import SimpleLayout from 'layout/SimpleLayout';
 

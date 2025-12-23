@@ -67,8 +67,8 @@ export default function SupabaseLogin({ ...others }) {
   return (
     <Formik
       initialValues={{
-        email: 'edwardsrobbie@gmail.com',
-        password: 'Beta22charlie',
+        email: '',
+        password: '',
         submit: null
       }}
       validationSchema={Yup.object().shape({

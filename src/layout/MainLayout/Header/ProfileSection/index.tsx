@@ -1,25 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import Avatar from '@mui/material/Avatar';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import InputAdornment from '@mui/material/InputAdornment';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
-import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
@@ -27,28 +17,22 @@ import Box from '@mui/material/Box';
 import { FormattedMessage } from 'react-intl';
 
 // project imports
-import { ThemeMode } from 'config';
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
 import useAuth from 'hooks/useAuth';
 
 // assets
-import User1 from 'assets/images/users/user-round.svg';
-import { IconLogout, IconSearch, IconSettings, IconUser } from '@tabler/icons-react';
+import { IconLogout, IconSettings } from '@tabler/icons-react';
 import useConfig from 'hooks/useConfig';
 
 // ==============================|| PROFILE MENU ||============================== //
 
 export default function ProfileSection() {
   const theme = useTheme();
-  const { mode, borderRadius } = useConfig();
-  const navigate = useNavigate();
+  const { borderRadius } = useConfig();
 
-  const [sdm, setSdm] = useState(true);
-  const [value, setValue] = useState('');
-  const [notification, setNotification] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const [open, setOpen] = useState(false);
 
   /**
@@ -60,15 +44,6 @@ export default function ProfileSection() {
       await logout();
     } catch (err) {
       console.error(err);
-    }
-  };
-
-  const handleListItemClick = (event: React.MouseEvent<HTMLDivElement>, index: number, route: string = '') => {
-    setSelectedIndex(index);
-    handleClose(event);
-
-    if (route && route !== '') {
-      navigate(route);
     }
   };
 

@@ -1,16 +1,9 @@
-import { useEffect, useState } from 'react';
-
 import MainCard from 'ui-component/cards/MainCard';
 import { Typography } from '@mui/material';
 
 // ==============================|| DEFAULT DASHBOARD ||============================== //
 
 export default function Dashboard() {
-  const [isLoading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(false);
-  }, []);
 
   return (
     <MainCard title="Sample Card">

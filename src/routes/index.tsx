@@ -1,4 +1,3 @@
-import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 
 // routes
@@ -8,7 +7,6 @@ import MainRoutes from './MainRoutes';
 import SimpleRoutes from './SimpleRoutes';
 
 // project imports
-import Loadable from 'ui-component/Loadable';
 import Login from 'views/pages/authentication/Login';
 
 // ==============================|| ROUTING RENDER ||============================== //

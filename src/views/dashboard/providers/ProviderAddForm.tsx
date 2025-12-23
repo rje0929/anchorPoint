@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 // material-ui
 import Box from '@mui/material/Box';
@@ -13,11 +13,9 @@ import Snackbar from '@mui/material/Snackbar';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import Chip from '@mui/material/Chip';
-import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 
 // icons
-import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 
 // project imports
