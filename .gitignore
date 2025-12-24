@@ -36,3 +36,7 @@ yarn-error.log*
 # Deployment archives
 *.tar.gz
 anchorpoint-deploy.tar.gz
+
+# Playwright test results
+/test-results/
+/playwright-report/
