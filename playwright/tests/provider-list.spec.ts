@@ -1,12 +1,17 @@
+import { login } from '../helpers/auth';
 import { test, expect } from '@playwright/test';
 
 test.describe('Provider List', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to providers page (adjust URL based on your routing)
-    await page.goto('/dashboard/providers');
+    // Login before each test
+    await login(page);
 
-    // Wait for providers to load
-    await page.waitForSelector('table', { timeout: 10000 });
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    // Navigate to providers page
+    await page.goto(`${baseURL}/dashboard/providers`);
+
+    // Wait for page to load by checking for the title
+    await page.waitForSelector('text=Anchor Point Providers', { timeout: 15000 });
   });
 
   test('should display provider list page', async ({ page }) => {
@@ -18,27 +23,23 @@ test.describe('Provider List', () => {
   });
 
   test('should display provider table with headers', async ({ page }) => {
-    // Check table headers
-    await expect(page.getByText('Provider Name')).toBeVisible();
-    await expect(page.getByText('Contact')).toBeVisible();
-    await expect(page.getByText('Regions Served')).toBeVisible();
-    await expect(page.getByText('Actions')).toBeVisible();
+    // Check table headers by role
+    await expect(page.getByRole('columnheader', { name: 'Provider Name' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Contact' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Regions Served' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Actions' })).toBeVisible();
   });
 
   test('should search providers by name', async ({ page }) => {
-    // Get initial row count
-    const initialRows = await page.locator('tbody tr').count();
-
-    // Type in search box
+    // Type in search box with a very specific search term
     const searchBox = page.getByPlaceholder(/search providers/i);
-    await searchBox.fill('Test Provider');
+    await searchBox.fill('XYZ Nonexistent Provider Name 12345');
 
     // Wait for filter to apply
     await page.waitForTimeout(500);
 
-    // Row count should change (unless "Test Provider" exists)
-    const filteredRows = await page.locator('tbody tr').count();
-    expect(filteredRows).toBeLessThanOrEqual(initialRows);
+    // Should show "No providers match your filters" message
+    await expect(page.getByText(/no providers match your filters/i)).toBeVisible();
   });
 
   test('should filter by business type', async ({ page }) => {
@@ -57,8 +58,9 @@ test.describe('Provider List', () => {
       // Wait for filter to apply
       await page.waitForTimeout(500);
 
-      // Verify active filter chip appears
-      await expect(page.locator('[role="alert"]').or(page.locator('.MuiChip-root'))).toBeVisible();
+      // Verify the filter was applied - check that the selected option appears as a chip in the autocomplete
+      const filterChips = page.locator('.MuiAutocomplete-tag');
+      await expect(filterChips.first()).toBeVisible();
     }
   });
 
@@ -152,11 +154,14 @@ test.describe('Provider List', () => {
     // Click "Add New Provider" button
     await page.getByRole('button', { name: /add new provider/i }).click();
 
-    // Should show add form
-    await expect(page.getByText(/add new provider/i)).toBeVisible();
+    // Wait for the form to load
+    await page.waitForTimeout(500);
 
-    // Should have nonprofit name field
+    // Should have nonprofit name field (better indicator that form is shown)
     await expect(page.getByLabel(/nonprofit name/i)).toBeVisible();
+
+    // Should have street address field
+    await expect(page.getByLabel(/street address/i).first()).toBeVisible();
   });
 
   test('should clear all filters', async ({ page }) => {

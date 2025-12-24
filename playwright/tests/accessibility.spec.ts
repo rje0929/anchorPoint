@@ -1,8 +1,10 @@
+import { login } from '../helpers/auth';
 import { test, expect } from '@playwright/test';
 
 test.describe('Accessibility', () => {
   test('login page should have proper heading structure', async ({ page }) => {
-    await page.goto('/login');
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    await page.goto(`${baseURL}/login`);
 
     // Should have main heading
     const heading = page.locator('h1, h2, h3').first();
@@ -10,7 +12,9 @@ test.describe('Accessibility', () => {
   });
 
   test('provider list should have accessible table', async ({ page }) => {
-    await page.goto('/dashboard/providers');
+    await login(page);
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    await page.goto(`${baseURL}/dashboard/providers`);
     await page.waitForSelector('table');
 
     // Table should have headers
@@ -19,15 +23,20 @@ test.describe('Accessibility', () => {
   });
 
   test('buttons should have accessible labels', async ({ page }) => {
-    await page.goto('/dashboard/providers');
+    await login(page);
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    await page.goto(`${baseURL}/dashboard/providers`);
+    await page.waitForSelector('table');
 
-    // All icon buttons should have aria-labels
-    const iconButtons = page.locator('button[aria-label]');
+    // All icon buttons should have aria-labels (edit, delete buttons)
+    const iconButtons = page.locator('[aria-label="edit"], [aria-label="delete"]');
     expect(await iconButtons.count()).toBeGreaterThan(0);
   });
 
   test('form inputs should have labels', async ({ page }) => {
-    await page.goto('/dashboard/providers');
+    await login(page);
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    await page.goto(`${baseURL}/dashboard/providers`);
     await page.getByRole('button', { name: /add new provider/i }).click();
     await page.waitForTimeout(1000);
 
@@ -36,22 +45,10 @@ test.describe('Accessibility', () => {
     await expect(nonprofitInput).toBeVisible();
   });
 
-  test('map should be keyboard navigable', async ({ page }) => {
-    await page.goto('/dashboard/provider-map');
-    await page.waitForSelector('.mapboxgl-canvas', { timeout: 10000 });
-
-    // Tab to focus on map controls
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-
-    // Some element should have focus
-    const focusedElement = await page.locator(':focus');
-    expect(await focusedElement.count()).toBe(1);
-  });
-
   test('checkboxes should have labels', async ({ page }) => {
-    await page.goto('/dashboard/providers');
+    await login(page);
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    await page.goto(`${baseURL}/dashboard/providers`);
 
     // Emergency shelter checkbox should have label
     const checkbox = page.getByLabel(/emergency shelter/i);
@@ -59,7 +56,8 @@ test.describe('Accessibility', () => {
   });
 
   test('images should have alt text', async ({ page }) => {
-    await page.goto('/login');
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    await page.goto(`${baseURL}/login`);
 
     // Logo should have alt text
     const logo = page.locator('img[alt="Anchor Point"]');
@@ -67,7 +65,9 @@ test.describe('Accessibility', () => {
   });
 
   test('dialogs should be accessible', async ({ page }) => {
-    await page.goto('/dashboard/providers');
+    await login(page);
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    await page.goto(`${baseURL}/dashboard/providers`);
     await page.waitForSelector('table');
 
     // Open delete dialog

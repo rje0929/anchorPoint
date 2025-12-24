@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/login');
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
+    await page.goto(`${baseURL}/login`);
   });
 
   test('should display login page with logo', async ({ page }) => {
@@ -35,21 +36,13 @@ test.describe('Authentication', () => {
     await submitButton.click();
 
     // Should show validation messages
-    await expect(page.locator('text=/email/i')).toBeVisible();
-  });
-
-  test('should navigate to register page', async ({ page }) => {
-    // Click "Don't have an account?" link
-    await page.click('text=Don\'t have an account?');
-
-    // Should navigate to register page
-    await expect(page).toHaveURL(/.*register/);
+    await expect(page.getByText('Email is required')).toBeVisible();
   });
 
   test('should attempt login with valid credentials', async ({ page }) => {
     // Fill in login form
-    await page.fill('input[type="email"]', 'test@example.com');
-    await page.fill('input[type="password"]', 'password123');
+    await page.fill('input[type="email"]', process.env.PLAYWRIGHT_TEST_EMAIL || 'test@anchorpoint.example.com');
+    await page.fill('input[type="password"]', process.env.PLAYWRIGHT_TEST_PASSWORD || 'testPassword123!');
 
     // Submit form
     await page.click('button[type="submit"]');

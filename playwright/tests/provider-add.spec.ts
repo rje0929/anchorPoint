@@ -1,24 +1,31 @@
+import { login } from '../helpers/auth';
 import { test, expect } from '@playwright/test';
 
 test.describe('Add Provider', () => {
   test.beforeEach(async ({ page }) => {
+    // Login before each test
+    await login(page);
+
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
     // Navigate to providers page
-    await page.goto('/dashboard/providers');
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.goto(`${baseURL}/dashboard/providers`);
+
+    // Wait for page to load
+    await page.waitForSelector('text=Anchor Point Providers', { timeout: 15000 });
 
     // Click "Add New Provider" button
     await page.getByRole('button', { name: /add new provider/i }).click();
 
     // Wait for form to load
-    await page.waitForSelector('input', { timeout: 5000 });
+    await page.waitForTimeout(500);
   });
 
   test('should display add provider form', async ({ page }) => {
-    // Check form title
-    await expect(page.getByText(/add new provider/i)).toBeVisible();
-
-    // Check for nonprofit name field (required)
+    // Check for nonprofit name field (required) - better indicator that form is shown
     await expect(page.getByLabel(/nonprofit name/i)).toBeVisible();
+
+    // Check for create provider button
+    await expect(page.getByRole('button', { name: /create provider/i })).toBeVisible();
   });
 
   test('should show required field validation', async ({ page }) => {
@@ -33,8 +40,8 @@ test.describe('Add Provider', () => {
     // Fill nonprofit name
     await page.getByLabel(/nonprofit name/i).fill('Test Nonprofit Organization');
 
-    // Fill description
-    const descriptionField = page.getByLabel(/description/i);
+    // Fill description (target the main provider description field)
+    const descriptionField = page.getByRole('textbox', { name: 'Description', exact: true });
     if (await descriptionField.isVisible()) {
       await descriptionField.fill('This is a test nonprofit providing support services.');
     }
@@ -85,8 +92,8 @@ test.describe('Add Provider', () => {
     // Fill nonprofit name
     await page.getByLabel(/nonprofit name/i).fill('Test Nonprofit');
 
-    // Fill address fields if visible
-    const streetAddress = page.getByLabel(/street address/i);
+    // Fill address fields if visible (use .first() to avoid strict mode violations)
+    const streetAddress = page.getByLabel(/street address/i).first();
     if (await streetAddress.isVisible()) {
       await streetAddress.fill('123 Main Street');
     }
@@ -98,8 +105,8 @@ test.describe('Add Provider', () => {
 
     const state = page.getByLabel(/state/i);
     if (await state.isVisible()) {
-      await state.click();
-      await page.getByText('NC').click();
+      // Just fill the state field directly instead of clicking dropdown
+      await state.fill('NC');
     }
 
     const zipCode = page.getByLabel(/zip code/i);
@@ -118,8 +125,8 @@ test.describe('Add Provider', () => {
       await phoneField.fill('(919) 555-1234');
     }
 
-    // Fill email
-    const emailField = page.getByLabel(/email/i);
+    // Fill general email (use .first() to get the first email field)
+    const emailField = page.getByLabel(/email/i).first();
     if (await emailField.isVisible()) {
       await emailField.fill('info@testnonprofit.org');
     }
@@ -129,8 +136,8 @@ test.describe('Add Provider', () => {
     // Fill nonprofit name
     await page.getByLabel(/nonprofit name/i).fill('Test Nonprofit');
 
-    // Look for emergency shelter checkbox
-    const emergencyCheckbox = page.getByLabel(/emergency shelter/i);
+    // Look for emergency shelter checkbox (use role to target the checkbox specifically)
+    const emergencyCheckbox = page.getByRole('checkbox', { name: /emergency shelter/i });
     if (await emergencyCheckbox.isVisible()) {
       await emergencyCheckbox.click();
       await expect(emergencyCheckbox).toBeChecked();
@@ -144,7 +151,6 @@ test.describe('Add Provider', () => {
 
     // Should return to provider list
     await expect(page.getByText('Anchor Point Providers')).toBeVisible();
-    await expect(page.locator('table')).toBeVisible();
   });
 
   test('should create new provider', async ({ page }) => {

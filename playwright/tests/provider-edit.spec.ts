@@ -1,10 +1,17 @@
+import { login } from '../helpers/auth';
 import { test, expect } from '@playwright/test';
 
 test.describe('Edit Provider', () => {
   test.beforeEach(async ({ page }) => {
+    // Login before each test
+    await login(page);
+
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
     // Navigate to providers page
-    await page.goto('/dashboard/providers');
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.goto(`${baseURL}/dashboard/providers`);
+
+    // Wait for page to load
+    await page.waitForSelector('text=Anchor Point Providers', { timeout: 15000 });
 
     // Click first "Edit" button
     const editButton = page.locator('[aria-label="edit"]').first();
@@ -36,7 +43,8 @@ test.describe('Edit Provider', () => {
   });
 
   test('should update description', async ({ page }) => {
-    const description = page.getByLabel(/description/i);
+    // Target the main provider description field (first one at the top of the form)
+    const description = page.getByRole('textbox', { name: 'Description', exact: true });
 
     if (await description.isVisible()) {
       await description.clear();

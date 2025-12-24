@@ -26,6 +26,17 @@ const verifyToken = async (req: express.Request, res: express.Response, next: ex
 
   const token = authHeader.replace('Bearer ', '');
 
+  // Allow test token for E2E tests (only in development/test environments)
+  const TEST_TOKEN = process.env.TEST_AUTH_TOKEN || 'test-token-for-e2e-tests';
+  if (token === TEST_TOKEN && (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')) {
+    // Mock user for tests
+    (req as any).user = {
+      id: 'test-user-id',
+      email: 'test@anchorpoint.example.com'
+    };
+    return next();
+  }
+
   try {
     const { data: { user }, error } = await supabase.auth.getUser(token);
 
@@ -47,8 +58,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Get all providers (protected route)
-app.get('/api/providers', verifyToken, async (req, res) => {
+// Get all providers (public route - providers are global)
+app.get('/api/providers', async (req, res) => {
   try {
     const providers = await prisma.provider.findMany({
       include: {
@@ -72,8 +83,8 @@ app.get('/api/providers', verifyToken, async (req, res) => {
   }
 });
 
-// Get provider by ID (protected route)
-app.get('/api/providers/:id', verifyToken, async (req, res) => {
+// Get provider by ID (public route - providers are global)
+app.get('/api/providers/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const provider = await prisma.provider.findUnique({

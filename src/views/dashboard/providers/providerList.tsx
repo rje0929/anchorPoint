@@ -228,6 +228,11 @@ export default function ProviderList({ showAddForm = false, setShowAddForm }: Pr
     fetchProviders();
   }, []);
 
+  // If adding, show the add form (check this first, before loading/error states)
+  if (showAddForm) {
+    return <ProviderAddForm onCancel={handleCancelAdd} onSaveSuccess={handleSaveSuccess} />;
+  }
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
@@ -242,11 +247,6 @@ export default function ProviderList({ showAddForm = false, setShowAddForm }: Pr
         <Alert severity="error">{error}</Alert>
       </Box>
     );
-  }
-
-  // If adding, show the add form
-  if (showAddForm) {
-    return <ProviderAddForm onCancel={handleCancelAdd} onSaveSuccess={handleSaveSuccess} />;
   }
 
   // If editing, show the edit form instead of the list

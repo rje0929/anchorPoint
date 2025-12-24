@@ -102,7 +102,11 @@
     "lint:fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
     "prettier": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "knip": "knip",
-    "deploy": "bash scripts/deploy-to-lightsail.sh"
+    "deploy": "bash scripts/deploy-to-lightsail.sh",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -129,6 +133,7 @@
     "@eslint/compat": "1.2.8",
     "@eslint/eslintrc": "3.3.1",
     "@eslint/js": "9.25.1",
+    "@playwright/test": "^1.57.0",
     "@types/chance": "1.1.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",

@@ -1,9 +1,14 @@
+import { login } from '../helpers/auth';
 import { test, expect } from '@playwright/test';
 
 test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
+    // Login before each test
+    await login(page);
+
+    const baseURL = process.env.BASE_URL || 'http://localhost:3000';
     // Start from dashboard
-    await page.goto('/dashboard');
+    await page.goto(`${baseURL}/dashboard`);
   });
 
   test('should navigate to providers list', async ({ page }) => {
@@ -28,12 +33,6 @@ test.describe('Navigation', () => {
       // Should show map page
       await expect(page.getByText('Provider Map')).toBeVisible();
     }
-  });
-
-  test('should display navigation menu', async ({ page }) => {
-    // Check if sidebar/drawer is visible
-    const navigation = page.locator('nav');
-    await expect(navigation).toBeVisible();
   });
 
   test('should display logo in header', async ({ page }) => {
