@@ -32,14 +32,14 @@ async function getAuthHeaders() {
 
 export const providerService = {
   async getAllProviders(): Promise<Provider[]> {
-    // Providers are public/global - no auth required
-    const response = await axios.get(`${API_URL}/api/providers`);
+    const headers = await getAuthHeaders();
+    const response = await axios.get(`${API_URL}/api/providers`, { headers });
     return response.data;
   },
 
   async getProviderById(id: number): Promise<Provider> {
-    // Providers are public/global - no auth required
-    const response = await axios.get(`${API_URL}/api/providers/${id}`);
+    const headers = await getAuthHeaders();
+    const response = await axios.get(`${API_URL}/api/providers/${id}`, { headers });
     return response.data;
   },
 

@@ -197,5 +197,7 @@
   "logout": "Logout",
   "more-items": "More Items",
   "Providers": "Providers",
-  "Provider Map": "Provider Map"
+  "Provider Map": "Provider Map",
+  "Administration": "Administration",
+  "Manage Users": "Manage Users"
 }

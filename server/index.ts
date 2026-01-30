@@ -1,12 +1,18 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { PrismaClient } from '../src/generated/prisma';
+import { PrismaClient, Role } from '../src/generated/prisma';
 import { createClient } from '@supabase/supabase-js';
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3010;
+
+// Type for request with user attached
+interface AuthenticatedRequest extends express.Request {
+  user?: { id: string; email?: string };
+  dbUser?: { id: string; email: string; name: string | null; role: Role; isVerified: boolean };
+}
 
 // Initialize Supabase client for JWT verification
 const supabaseUrl = process.env.VITE_SUPABASE_URL!;
@@ -29,10 +35,17 @@ const verifyToken = async (req: express.Request, res: express.Response, next: ex
   // Allow test token for E2E tests (only in development/test environments)
   const TEST_TOKEN = process.env.TEST_AUTH_TOKEN || 'test-token-for-e2e-tests';
   if (token === TEST_TOKEN && (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test')) {
-    // Mock user for tests
-    (req as any).user = {
+    // Mock user for tests - set as verified ADMIN
+    (req as AuthenticatedRequest).user = {
       id: 'test-user-id',
       email: 'test@anchorpoint.example.com'
+    };
+    (req as AuthenticatedRequest).dbUser = {
+      id: 'test-user-id',
+      email: 'test@anchorpoint.example.com',
+      name: 'Test User',
+      role: 'ADMIN',
+      isVerified: true
     };
     return next();
   }
@@ -45,7 +58,7 @@ const verifyToken = async (req: express.Request, res: express.Response, next: ex
     }
 
     // Attach user to request object for use in route handlers
-    (req as any).user = user;
+    (req as AuthenticatedRequest).user = user;
     next();
   } catch (error) {
     console.error('Token verification error:', error);
@@ -53,13 +66,278 @@ const verifyToken = async (req: express.Request, res: express.Response, next: ex
   }
 };
 
+// Middleware to require verified user
+const requireVerified = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const authReq = req as AuthenticatedRequest;
+
+  // If dbUser already set (e.g., test mode), check verification
+  if (authReq.dbUser) {
+    if (!authReq.dbUser.isVerified) {
+      return res.status(403).json({ error: 'Account pending verification', code: 'PENDING_VERIFICATION' });
+    }
+    return next();
+  }
+
+  const user = authReq.user;
+  if (!user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id }
+    });
+
+    if (!dbUser) {
+      return res.status(403).json({ error: 'User not found in database', code: 'USER_NOT_FOUND' });
+    }
+
+    if (!dbUser.isVerified) {
+      return res.status(403).json({ error: 'Account pending verification', code: 'PENDING_VERIFICATION' });
+    }
+
+    authReq.dbUser = dbUser;
+    next();
+  } catch (error) {
+    console.error('Verification check error:', error);
+    return res.status(500).json({ error: 'Failed to check verification status' });
+  }
+};
+
+// Middleware to require specific roles (also checks verification)
+const requireRole = (...allowedRoles: Role[]) => {
+  return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const authReq = req as AuthenticatedRequest;
+
+    // If dbUser already set (e.g., test mode), check role
+    if (authReq.dbUser) {
+      if (!authReq.dbUser.isVerified) {
+        return res.status(403).json({ error: 'Account pending verification', code: 'PENDING_VERIFICATION' });
+      }
+      if (!allowedRoles.includes(authReq.dbUser.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions', code: 'INSUFFICIENT_PERMISSIONS' });
+      }
+      return next();
+    }
+
+    const user = authReq.user;
+    if (!user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id }
+      });
+
+      if (!dbUser) {
+        return res.status(403).json({ error: 'User not found in database', code: 'USER_NOT_FOUND' });
+      }
+
+      if (!dbUser.isVerified) {
+        return res.status(403).json({ error: 'Account pending verification', code: 'PENDING_VERIFICATION' });
+      }
+
+      if (!allowedRoles.includes(dbUser.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions', code: 'INSUFFICIENT_PERMISSIONS' });
+      }
+
+      authReq.dbUser = dbUser;
+      next();
+    } catch (error) {
+      console.error('Role check error:', error);
+      return res.status(500).json({ error: 'Failed to check permissions' });
+    }
+  };
+};
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Get all providers (public route - providers are global)
-app.get('/api/providers', async (req, res) => {
+// ================================|| USER MANAGEMENT ||================================ //
+
+// Sync user profile on login (create if not exists)
+app.post('/api/users/sync', verifyToken, async (req, res) => {
+  const authReq = req as AuthenticatedRequest;
+  const user = authReq.user;
+
+  if (!user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    // Check if user exists
+    let dbUser = await prisma.user.findUnique({
+      where: { id: user.id }
+    });
+
+    let isNewUser = false;
+
+    if (!dbUser) {
+      // Create new user with READ_ONLY role and unverified
+      isNewUser = true;
+      dbUser = await prisma.user.create({
+        data: {
+          id: user.id,
+          email: user.email || '',
+          name: null,
+          role: 'READ_ONLY',
+          isVerified: false
+        }
+      });
+    }
+
+    res.json({ ...dbUser, isNewUser });
+  } catch (error) {
+    console.error('Error syncing user:', error);
+    res.status(500).json({ error: 'Failed to sync user profile' });
+  }
+});
+
+// Get current user profile
+app.get('/api/users/me', verifyToken, async (req, res) => {
+  const authReq = req as AuthenticatedRequest;
+  const user = authReq.user;
+
+  if (!user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id }
+    });
+
+    if (!dbUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(dbUser);
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Failed to fetch user profile' });
+  }
+});
+
+// Get all users (admin only)
+app.get('/api/users', verifyToken, requireRole('ADMIN'), async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// Update user role (admin only)
+app.put('/api/users/:id/role', verifyToken, requireRole('ADMIN'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!role || !['ADMIN', 'READ_ONLY'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role. Must be ADMIN or READ_ONLY' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { role: role as Role }
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error updating user role:', error);
+    res.status(500).json({ error: 'Failed to update user role' });
+  }
+});
+
+// Verify/approve user (admin only)
+app.put('/api/users/:id/verify', verifyToken, requireRole('ADMIN'), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { isVerified: true }
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error verifying user:', error);
+    res.status(500).json({ error: 'Failed to verify user' });
+  }
+});
+
+// Revoke access / unverify user (admin only)
+app.put('/api/users/:id/unverify', verifyToken, requireRole('ADMIN'), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { isVerified: false }
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error revoking user access:', error);
+    res.status(500).json({ error: 'Failed to revoke user access' });
+  }
+});
+
+// Delete user (admin only, READ_ONLY users only)
+app.delete('/api/users/:id', verifyToken, requireRole('ADMIN'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authReq = req as AuthenticatedRequest;
+
+    // Prevent admins from deleting themselves
+    if (authReq.user?.id === id || authReq.dbUser?.id === id) {
+      return res.status(400).json({ error: 'Cannot delete your own account' });
+    }
+
+    // Check if user exists and is READ_ONLY
+    const userToDelete = await prisma.user.findUnique({
+      where: { id }
+    });
+
+    if (!userToDelete) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (userToDelete.role !== 'READ_ONLY') {
+      return res.status(400).json({ error: 'Can only delete READ_ONLY users. Change their role first if needed.' });
+    }
+
+    // Delete from Supabase Auth first
+    const { error: supabaseError } = await supabase.auth.admin.deleteUser(id);
+
+    if (supabaseError) {
+      console.error('Error deleting user from Supabase:', supabaseError);
+      return res.status(500).json({ error: 'Failed to delete user from authentication system' });
+    }
+
+    // Delete from database
+    await prisma.user.delete({
+      where: { id }
+    });
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
+
+// ================================|| PROVIDERS ||================================ //
+
+// Get all providers (verified users only)
+app.get('/api/providers', verifyToken, requireVerified, async (req, res) => {
   try {
     const providers = await prisma.provider.findMany({
       include: {
@@ -83,8 +361,8 @@ app.get('/api/providers', async (req, res) => {
   }
 });
 
-// Get provider by ID (public route - providers are global)
-app.get('/api/providers/:id', async (req, res) => {
+// Get provider by ID (verified users only)
+app.get('/api/providers/:id', verifyToken, requireVerified, async (req, res) => {
   try {
     const { id } = req.params;
     const provider = await prisma.provider.findUnique({
@@ -112,8 +390,8 @@ app.get('/api/providers/:id', async (req, res) => {
   }
 });
 
-// Create provider (protected route - admin only)
-app.post('/api/providers', verifyToken, async (req, res) => {
+// Create provider (admin only)
+app.post('/api/providers', verifyToken, requireRole('ADMIN'), async (req, res) => {
   try {
     const {
       address,
@@ -250,8 +528,8 @@ app.post('/api/providers', verifyToken, async (req, res) => {
   }
 });
 
-// Update provider (protected route - admin only)
-app.put('/api/providers/:id', verifyToken, async (req, res) => {
+// Update provider (admin only)
+app.put('/api/providers/:id', verifyToken, requireRole('ADMIN'), async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -445,8 +723,8 @@ app.put('/api/providers/:id', verifyToken, async (req, res) => {
   }
 });
 
-// Delete provider (protected route - admin only)
-app.delete('/api/providers/:id', verifyToken, async (req, res) => {
+// Delete provider (admin only)
+app.delete('/api/providers/:id', verifyToken, requireRole('ADMIN'), async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.provider.delete({

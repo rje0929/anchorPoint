@@ -38,6 +38,7 @@ import { Provider } from '../../../types/provider';
 import ProviderDetailDrawer from './ProviderDetailDrawer';
 import ProviderEditForm from './ProviderEditForm';
 import ProviderAddForm from './ProviderAddForm';
+import useUserPermissions from 'hooks/useUserPermissions';
 
 // ==============================|| PROVIDER LIST ||============================== //
 
@@ -61,6 +62,7 @@ export default function ProviderList({ showAddForm = false, setShowAddForm }: Pr
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [providerToDelete, setProviderToDelete] = React.useState<Provider | null>(null);
   const [deleting, setDeleting] = React.useState(false);
+  const { canEdit, canDelete } = useUserPermissions();
 
   const handleViewDetails = (provider: Provider) => {
     setSelectedProvider(provider);
@@ -431,16 +433,20 @@ export default function ProviderList({ showAddForm = false, setShowAddForm }: Pr
                           <VisibilityTwoToneIcon sx={{ fontSize: '1.1rem' }} />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip placement="top" title="Edit">
-                        <IconButton color="secondary" aria-label="edit" size="large" onClick={() => handleEditProvider(row)}>
-                          <EditTwoToneIcon sx={{ fontSize: '1.1rem' }} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip placement="top" title="Delete">
-                        <IconButton color="error" aria-label="delete" size="large" onClick={() => handleDeleteClick(row)}>
-                          <DeleteTwoToneIcon sx={{ fontSize: '1.1rem' }} />
-                        </IconButton>
-                      </Tooltip>
+                      {canEdit && (
+                        <Tooltip placement="top" title="Edit">
+                          <IconButton color="secondary" aria-label="edit" size="large" onClick={() => handleEditProvider(row)}>
+                            <EditTwoToneIcon sx={{ fontSize: '1.1rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {canDelete && (
+                        <Tooltip placement="top" title="Delete">
+                          <IconButton color="error" aria-label="delete" size="large" onClick={() => handleDeleteClick(row)}>
+                            <DeleteTwoToneIcon sx={{ fontSize: '1.1rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </Stack>
                   </TableCell>
                 </TableRow>

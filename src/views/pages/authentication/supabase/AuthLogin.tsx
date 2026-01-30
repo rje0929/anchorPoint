@@ -194,6 +194,22 @@ export default function SupabaseLogin({ ...others }) {
               </Button>
             </AnimateButton>
           </Box>
+          <Grid container justifyContent="center" sx={{ mt: 2 }}>
+            <Grid>
+              <Typography variant="subtitle1" sx={{ textDecoration: 'none' }}>
+                Don&apos;t have an account?{' '}
+                <Typography
+                  component={Link}
+                  to={authParam ? `/register?auth=${authParam}` : '/register'}
+                  variant="subtitle1"
+                  color="secondary"
+                  sx={{ textDecoration: 'none' }}
+                >
+                  Sign up
+                </Typography>
+              </Typography>
+            </Grid>
+          </Grid>
         </form>
       )}
     </Formik>

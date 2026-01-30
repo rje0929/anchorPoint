@@ -14,14 +14,24 @@ import { useEffect } from 'react';
  */
 
 export default function GuestGuard({ children }: GuardProps) {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isVerified, dbUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate(DASHBOARD_PATH, { replace: true });
+      // Wait for dbUser to be loaded before deciding where to redirect
+      if (dbUser) {
+        if (isVerified) {
+          // User is verified, go to dashboard
+          navigate(DASHBOARD_PATH, { replace: true });
+        } else {
+          // User is logged in but not verified, go to pending verification
+          navigate('/pending-verification', { replace: true });
+        }
+      }
+      // If dbUser hasn't loaded yet, don't redirect - wait for it
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, isVerified, dbUser, navigate]);
 
   return children;
 }

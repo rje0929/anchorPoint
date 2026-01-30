@@ -2,7 +2,6 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 
 // Configuration
-const config = new pulumi.Config();
 const appName = "anchorpoint";
 const instanceSize = "medium_2_0"; // $10/month (1GB RAM, 2 vCPUs, 40GB SSD)
 const region = aws.config.region || "us-east-1";
@@ -65,10 +64,11 @@ npm run build
 pm2 delete anchorpoint-api || true
 pm2 start server/index.ts --name anchorpoint-api --interpreter tsx -- --port 3010
 
-# Serve frontend with PM2 (using serve package)
-npm install -g serve
-pm2 delete anchorpoint-frontend || true
-pm2 start serve --name anchorpoint-frontend -- -s dist -l 3000
+# Frontend is served directly by nginx from /opt/anchorpoint/dist
+# No need for PM2 + serve
+
+# Restart nginx to pick up any config changes
+sudo systemctl reload nginx
 
 # Save PM2 configuration
 pm2 save
@@ -77,20 +77,18 @@ EOF
 
 chmod +x /opt/anchorpoint/startup.sh
 
-# Configure Nginx as reverse proxy
+# Configure Nginx to serve frontend static files and proxy API
 cat > /etc/nginx/sites-available/anchorpoint << 'EOF'
 server {
     listen 80;
     server_name _;
 
-    # Frontend
+    # Frontend - serve static files directly from dist
+    root /opt/anchorpoint/dist;
+    index index.html;
+
     location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
+        try_files \$uri \$uri/ /index.html;
     }
 
     # API
@@ -172,35 +170,29 @@ const staticIpAttachment = new aws.lightsail.StaticIpAttachment(`${appName}-ip-a
     instanceName: instance.name,
 });
 
-// Open firewall ports
-const httpsPort = new aws.lightsail.InstancePublicPorts(`${appName}-https`, {
+// Open firewall ports (all ports must be in a single resource - Lightsail replaces all rules)
+const publicPorts = new aws.lightsail.InstancePublicPorts(`${appName}-ports`, {
     instanceName: instance.name,
-    portInfos: [{
-        protocol: "tcp",
-        fromPort: 443,
-        toPort: 443,
-        cidrs: ["0.0.0.0/0"],
-    }],
-});
-
-const httpPort = new aws.lightsail.InstancePublicPorts(`${appName}-http`, {
-    instanceName: instance.name,
-    portInfos: [{
-        protocol: "tcp",
-        fromPort: 80,
-        toPort: 80,
-        cidrs: ["0.0.0.0/0"],
-    }],
-});
-
-const sshPort = new aws.lightsail.InstancePublicPorts(`${appName}-ssh`, {
-    instanceName: instance.name,
-    portInfos: [{
-        protocol: "tcp",
-        fromPort: 22,
-        toPort: 22,
-        cidrs: ["0.0.0.0/0"],
-    }],
+    portInfos: [
+        {
+            protocol: "tcp",
+            fromPort: 22,
+            toPort: 22,
+            cidrs: ["0.0.0.0/0"],  // Allow SSH from anywhere
+        },
+        {
+            protocol: "tcp",
+            fromPort: 80,
+            toPort: 80,
+            cidrs: ["0.0.0.0/0"],
+        },
+        {
+            protocol: "tcp",
+            fromPort: 443,
+            toPort: 443,
+            cidrs: ["0.0.0.0/0"],
+        },
+    ],
 });
 
 // Outputs

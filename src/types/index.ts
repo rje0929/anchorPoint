@@ -76,6 +76,8 @@ export type HeadCell = {
 
 export type LinkTarget = '_blank' | '_self' | '_parent' | '_top';
 
+import { UserRole } from './auth';
+
 export type NavItemType = {
   id?: string;
   link?: string;
@@ -93,6 +95,7 @@ export type NavItemType = {
   children?: NavItemType[];
   elements?: NavItemType[];
   search?: string;
+  roles?: UserRole[];  // If set, only these roles see this item
 };
 
 export type AuthSliderProps = {

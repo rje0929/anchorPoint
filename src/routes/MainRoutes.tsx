@@ -1,8 +1,10 @@
 // project imports
 import MainLayout from 'layout/MainLayout';
 import AuthGuard from 'utils/route-guard/AuthGuard';
+import RoleGuard from 'utils/route-guard/RoleGuard';
 import Providers from 'views/dashboard/providers';
 import ProviderMap from 'views/dashboard/providers/ProviderMap';
+import UserManagement from 'views/admin/UserManagement';
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -21,6 +23,14 @@ const MainRoutes = {
     {
       path: '/dashboard/provider-map',
       element: <ProviderMap />
+    },
+    {
+      path: '/admin/users',
+      element: (
+        <RoleGuard allowedRoles={['ADMIN']}>
+          <UserManagement />
+        </RoleGuard>
+      )
     }
   ]
 };

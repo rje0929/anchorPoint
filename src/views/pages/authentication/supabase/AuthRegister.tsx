@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
@@ -24,7 +25,6 @@ import { Formik } from 'formik';
 // project imports
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import useAuth from 'hooks/useAuth';
-import useScriptRef from 'hooks/useScriptRef';
 import { strengthColor, strengthIndicator } from 'utils/password-strength';
 import { openSnackbar } from 'store/slices/snackbar';
 
@@ -41,11 +41,11 @@ import Stack from '@mui/material/Stack';
 export default function SupabaseRegister({ ...others }) {
   const theme = useTheme();
   const navigate = useNavigate();
-  const scriptedRef = useScriptRef();
   const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
   const [checked, setChecked] = useState(true);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [strength, setStrength] = useState(0);
   const [level, setLevel] = useState<StringColorProps>();
@@ -95,37 +95,45 @@ export default function SupabaseRegister({ ...others }) {
           firstName: Yup.string().max(255).required('First Name is required'),
           lastName: Yup.string().max(255).required('Last Name is required')
         })}
-        onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
+        onSubmit={async (values, { setStatus, setSubmitting }) => {
+          setSubmitError(null);
           try {
             await register?.(values.email, values.password, values.firstName, values.lastName);
-            if (scriptedRef.current) {
-              setStatus({ success: true });
-              setSubmitting(false);
-              dispatch(
-                openSnackbar({
-                  open: true,
-                  message: 'Your registration has been successfully completed.',
-                  variant: 'alert',
-                  alert: {
-                    color: 'success'
-                  },
-                  close: false
-                })
-              );
+            setStatus({ success: true });
+            setSubmitting(false);
+            dispatch(
+              openSnackbar({
+                open: true,
+                message: 'Your registration has been successfully completed.',
+                variant: 'alert',
+                alert: {
+                  color: 'success'
+                },
+                close: false
+              })
+            );
 
-              setTimeout(() => {
-                navigate(authParam ? `/check-mail?auth=${authParam}` : '/check-mail', {
-                  replace: true
-                });
-              }, 1500);
-            }
+            setTimeout(() => {
+              navigate(authParam ? `/check-mail?auth=${authParam}` : '/check-mail', {
+                replace: true
+              });
+            }, 1500);
           } catch (err: any) {
             console.error(err);
-            if (scriptedRef.current) {
-              setStatus({ success: false });
-              setErrors({ submit: err.message });
-              setSubmitting(false);
+            setStatus({ success: false });
+            setSubmitting(false);
+            // Provide user-friendly error messages
+            let errorMessage = err.message || 'Registration failed. Please try again.';
+            if (err.message?.includes('rate limit') || err.message?.includes('Too Many Requests')) {
+              errorMessage = 'Too many registration attempts. Please wait a few minutes before trying again.';
+            } else if (err.message?.includes('already registered') || err.message?.includes('already exists')) {
+              errorMessage = 'An account with this email already exists. Please log in instead.';
+            } else if (err.message?.includes('invalid email')) {
+              errorMessage = 'Please enter a valid email address.';
+            } else if (err.message?.includes('weak password') || err.message?.includes('password')) {
+              errorMessage = 'Password is too weak. Please use a stronger password.';
             }
+            setSubmitError(errorMessage);
           }
         }}
       >
@@ -262,9 +270,9 @@ export default function SupabaseRegister({ ...others }) {
                 />
               </Grid>
             </Grid>
-            {errors.submit && (
+            {submitError && (
               <Box sx={{ mt: 3 }}>
-                <FormHelperText error>{errors.submit}</FormHelperText>
+                <Alert severity="error">{submitError}</Alert>
               </Box>
             )}
 

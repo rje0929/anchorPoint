@@ -5,6 +5,19 @@ import firebase from 'firebase/compat/app';
 import { UserProfile } from 'types/user-profile';
 import { PopupLoginOptions, RedirectLoginOptions } from '@auth0/auth0-react';
 
+// Role-based access control types
+export type UserRole = 'ADMIN' | 'READ_ONLY';
+
+export interface DbUserProfile {
+  id: string;
+  email: string;
+  name?: string | null;
+  role: UserRole;
+  isVerified: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 type CanRemove = {
   login?: (email: string, password: string) => Promise<void>;
   register?: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
@@ -79,6 +92,10 @@ export type SupabaseContextType = CanRemove & {
   isLoggedIn: boolean;
   isInitialized?: boolean;
   user: UserProfile | null | undefined;
+  dbUser: DbUserProfile | null;
+  isAdmin: boolean;
+  isVerified: boolean;
+  canEdit: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   logout: () => Promise<void>;
