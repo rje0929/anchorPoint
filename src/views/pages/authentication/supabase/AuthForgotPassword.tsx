@@ -10,6 +10,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
 
 // third party
 import * as Yup from 'yup';
@@ -18,20 +19,14 @@ import { Formik } from 'formik';
 // project imports
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import useAuth from 'hooks/useAuth';
-import useScriptRef from 'hooks/useScriptRef';
-
-import { useDispatch } from 'store';
-import { openSnackbar } from 'store/slices/snackbar';
 
 // ========================|| SUPABASE - FORGOT PASSWORD ||======================== //
 
 export default function AuthForgotPassword({ ...others }) {
   const theme = useTheme();
-  const scriptedRef = useScriptRef();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const { forgotPassword } = useAuth();
 
@@ -53,36 +48,22 @@ export default function AuthForgotPassword({ ...others }) {
         email: Yup.string().email('Must be a valid email').max(255).required('Email is required')
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-        setIsLoading(true);
         localStorage.setItem('email', values.email);
         try {
           await forgotPassword?.(values.email);
-          if (scriptedRef.current) {
-            setStatus({ success: true });
-            setSubmitting(false);
-            dispatch(
-              openSnackbar({
-                open: true,
-                message: 'Check mail for verification code',
-                variant: 'alert',
-                alert: {
-                  color: 'success'
-                },
-                close: false
-              })
-            );
+          setStatus({ success: true });
+          setSubmitting(false);
+          setEmailSent(true);
 
-            setTimeout(() => {
-              navigate(authParam ? `/check-mail?auth=${authParam}` : '/check-mail', { replace: true });
-            }, 1500);
-          }
+          // Navigate to check-mail page after a short delay
+          setTimeout(() => {
+            navigate(authParam ? `/check-mail?auth=${authParam}` : '/check-mail', { replace: true });
+          }, 2000);
         } catch (err: any) {
           console.error(err);
-          if (scriptedRef.current) {
-            setStatus({ success: false });
-            setErrors({ submit: err.message });
-            setSubmitting(false);
-          }
+          setStatus({ success: false });
+          setErrors({ submit: err.message });
+          setSubmitting(false);
         }
       }}
     >
@@ -112,18 +93,26 @@ export default function AuthForgotPassword({ ...others }) {
             </Box>
           )}
 
+          {emailSent && (
+            <Box sx={{ mt: 2 }}>
+              <Alert severity="success">
+                Password reset email sent! Check your inbox and click the link to reset your password.
+              </Alert>
+            </Box>
+          )}
+
           <Box sx={{ mt: 2 }}>
             <AnimateButton>
               <Button
                 disableElevation
-                disabled={isLoading || isSubmitting}
+                disabled={emailSent || isSubmitting}
                 fullWidth
                 size="large"
                 type="submit"
                 variant="contained"
                 color="secondary"
               >
-                Send Mail
+                {emailSent ? 'Email Sent!' : 'Send Mail'}
               </Button>
             </AnimateButton>
           </Box>

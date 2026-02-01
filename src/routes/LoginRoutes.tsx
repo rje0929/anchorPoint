@@ -12,10 +12,10 @@ const AuthRegister = Loadable(lazy(() => import('views/pages/authentication/Regi
 const AuthForgotPassword = Loadable(lazy(() => import('views/pages/authentication/ForgotPassword')));
 const AuthResetPassword = Loadable(lazy(() => import('views/pages/authentication/ResetPassword')));
 const AuthCheckMail = Loadable(lazy(() => import('views/pages/authentication/CheckMail')));
-const AuthCodeVerification = Loadable(lazy(() => import('views/pages/authentication/CodeVerification')));
 
 // ==============================|| AUTH ROUTING ||============================== //
 
+// Routes that require user to NOT be logged in (login, register)
 const LoginRoutes = {
   path: '/',
   element: (
@@ -33,7 +33,19 @@ const LoginRoutes = {
     {
       path: '/register',
       element: <AuthRegister />
-    },
+    }
+  ]
+};
+
+// Password reset routes - accessible regardless of login state
+export const PasswordResetRoutes = {
+  path: '/',
+  element: (
+    <NavMotion>
+      <MinimalLayout />
+    </NavMotion>
+  ),
+  children: [
     {
       path: '/forgot-password',
       element: <AuthForgotPassword />
@@ -45,10 +57,6 @@ const LoginRoutes = {
     {
       path: '/check-mail',
       element: <AuthCheckMail />
-    },
-    {
-      path: '/code-verification',
-      element: <AuthCodeVerification />
     }
   ]
 };

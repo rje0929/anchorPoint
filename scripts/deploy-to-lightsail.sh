@@ -71,6 +71,9 @@ npm install --production=false
 # Generate Prisma client
 npx prisma generate
 
+# Clean dist folder to ensure fresh build with current env variables
+rm -rf dist
+
 # Build frontend
 npm run build
 

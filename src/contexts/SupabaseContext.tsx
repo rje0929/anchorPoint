@@ -81,7 +81,21 @@ export function SupabseProvider({ children }: { children: ReactElement }) {
     const {
       data: { subscription }
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+      if (event === 'PASSWORD_RECOVERY' && session) {
+        // User clicked the password reset link - store session so they can update password
+        setSession(session.access_token);
+        dispatch({
+          type: LOGIN,
+          payload: {
+            user: {
+              id: session.user.id,
+              email: session.user.email,
+              name: session.user.user_metadata?.display_name
+            },
+            isLoggedIn: true
+          }
+        });
+      } else if (event === 'SIGNED_IN' && session?.user) {
         // User just signed in (including via email confirmation link)
         setSession(session.access_token);
         dispatch({
@@ -176,9 +190,21 @@ export function SupabseProvider({ children }: { children: ReactElement }) {
 
   // FORGOT PASSWORD
   const forgotPassword = useCallback(async (email: string) => {
+    // Use VITE_APP_SITE_URL for production, fallback to window.location.origin for local dev
+    const siteUrl = import.meta.env.VITE_APP_SITE_URL || window.location.origin;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `/code-verification`
+      redirectTo: `${siteUrl}/reset-password`
     });
+
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+  }, []);
+
+  // UPDATE PASSWORD (used after clicking reset link in email)
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
 
     if (error) {
       console.error(error);
@@ -202,9 +228,10 @@ export function SupabseProvider({ children }: { children: ReactElement }) {
       login,
       register,
       logout,
-      forgotPassword
+      forgotPassword,
+      updatePassword
     }),
-    [forgotPassword, login, logout, register, state, dbUser, isAdmin, isVerified, canEdit]
+    [forgotPassword, login, logout, register, updatePassword, state, dbUser, isAdmin, isVerified, canEdit]
   );
 
   return <SupabaseContext value={memoizedValue}>{children}</SupabaseContext>;

@@ -13,6 +13,7 @@ import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
 
 // third party
 import * as Yup from 'yup';
@@ -20,12 +21,8 @@ import { Formik } from 'formik';
 
 // project imports
 import useAuth from 'hooks/useAuth';
-import useScriptRef from 'hooks/useScriptRef';
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import { strengthColor, strengthIndicator } from 'utils/password-strength';
-
-import { dispatch } from 'store';
-import { openSnackbar } from 'store/slices/snackbar';
 
 // assets
 import Visibility from '@mui/icons-material/Visibility';
@@ -39,13 +36,21 @@ import { StringColorProps } from 'types';
 export default function AuthResetPassword({ ...others }) {
   const theme = useTheme();
   const navigate = useNavigate();
-  const scriptedRef = useScriptRef();
 
   const [showPassword, setShowPassword] = useState(false);
   const [strength, setStrength] = useState(0);
   const [level, setLevel] = useState<StringColorProps>();
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
 
-  const { isLoggedIn } = useAuth();
+  const { updatePassword, isLoggedIn } = useAuth();
+
+  // Wait for session to be ready (from password recovery link)
+  useEffect(() => {
+    if (isLoggedIn) {
+      setSessionReady(true);
+    }
+  }, [isLoggedIn]);
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -83,34 +88,26 @@ export default function AuthResetPassword({ ...others }) {
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
-          // password reset
-          if (scriptedRef.current) {
-            setStatus({ success: true });
-            setSubmitting(false);
-
-            dispatch(
-              openSnackbar({
-                open: true,
-                message: 'Successfuly reset password.',
-                variant: 'alert',
-                alert: {
-                  color: 'success'
-                },
-                close: false
-              })
-            );
-
-            setTimeout(() => {
-              navigate(isLoggedIn ? '/auth/login' : authParam ? `/login?auth=${authParam}` : '/login', { replace: true });
-            }, 1500);
+          if (!updatePassword) {
+            throw new Error('Password update function not available. Please try again.');
           }
+
+          // Call Supabase to update the password
+          await updatePassword(values.password);
+
+          setStatus({ success: true });
+          setSubmitting(false);
+          setResetSuccess(true);
+
+          // Navigate to login page after a short delay
+          setTimeout(() => {
+            navigate(authParam ? `/login?auth=${authParam}` : '/login', { replace: true });
+          }, 2000);
         } catch (err: any) {
-          console.error(err);
-          if (scriptedRef.current) {
-            setStatus({ success: false });
-            setErrors({ submit: err.message });
-            setSubmitting(false);
-          }
+          console.error('Password reset error:', err);
+          setStatus({ success: false });
+          setErrors({ submit: err.message || 'Failed to reset password. Please try again.' });
+          setSubmitting(false);
         }
       }}
     >
@@ -205,10 +202,35 @@ export default function AuthResetPassword({ ...others }) {
               <FormHelperText error>{errors.submit}</FormHelperText>
             </Box>
           )}
+
+          {!sessionReady && (
+            <Box sx={{ mt: 2 }}>
+              <Alert severity="info">
+                Verifying your reset link... Please wait.
+              </Alert>
+            </Box>
+          )}
+
+          {resetSuccess && (
+            <Box sx={{ mt: 2 }}>
+              <Alert severity="success">
+                Password reset successfully! Redirecting to login...
+              </Alert>
+            </Box>
+          )}
+
           <Box sx={{ mt: 1 }}>
             <AnimateButton>
-              <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="secondary">
-                Reset Password
+              <Button
+                disableElevation
+                disabled={!sessionReady || resetSuccess || isSubmitting}
+                fullWidth
+                size="large"
+                type="submit"
+                variant="contained"
+                color="secondary"
+              >
+                {!sessionReady ? 'Verifying...' : resetSuccess ? 'Password Reset!' : 'Reset Password'}
               </Button>
             </AnimateButton>
           </Box>

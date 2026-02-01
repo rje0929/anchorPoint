@@ -40,7 +40,7 @@ export default function SupabaseLogin({ ...others }) {
 
   const theme = useTheme();
   const navigate = useNavigate();
-  const { login, isLoggedIn } = useAuth();
+  const { login } = useAuth();
   const scriptedRef = useScriptRef();
 
   const [checked, setChecked] = useState(true);
@@ -167,13 +167,7 @@ export default function SupabaseLogin({ ...others }) {
               <Typography
                 variant="subtitle1"
                 component={Link}
-                to={
-                  isLoggedIn
-                    ? '/pages/forgot-password/forgot-password3'
-                    : authParam
-                      ? `/forgot-password?auth=${authParam}`
-                      : '/forgot-password'
-                }
+                to={authParam ? `/forgot-password?auth=${authParam}` : '/forgot-password'}
                 color="secondary"
                 sx={{ textDecoration: 'none' }}
               >
