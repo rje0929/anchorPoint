@@ -39,4 +39,4 @@ anchorpoint-deploy.tar.gz
 
 # Playwright test results
 /test-results/
-/playwright-report/
+/playwright-report/anchorPoint.txt

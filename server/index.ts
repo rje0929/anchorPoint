@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3010;
 
 // Type for request with user attached
 interface AuthenticatedRequest extends express.Request {
-  user?: { id: string; email?: string };
+  user?: { id: string; email?: string; user_metadata?: { display_name?: string } };
   dbUser?: { id: string; email: string; name: string | null; role: Role; isVerified: boolean };
 }
 
@@ -56,6 +56,9 @@ const verifyToken = async (req: express.Request, res: express.Response, next: ex
     if (error || !user) {
       return res.status(401).json({ error: 'Invalid or expired token' });
     }
+
+    // Log user metadata for debugging
+    console.log('User from Supabase:', { id: user.id, email: user.email, user_metadata: user.user_metadata });
 
     // Attach user to request object for use in route handlers
     (req as AuthenticatedRequest).user = user;
@@ -168,6 +171,9 @@ app.post('/api/users/sync', verifyToken, async (req, res) => {
   }
 
   try {
+    // Extract display_name from Supabase user metadata (set during registration)
+    const displayName = user.user_metadata?.display_name || null;
+
     // Check if user exists
     let dbUser = await prisma.user.findUnique({
       where: { id: user.id }
@@ -182,10 +188,16 @@ app.post('/api/users/sync', verifyToken, async (req, res) => {
         data: {
           id: user.id,
           email: user.email || '',
-          name: null,
+          name: displayName,
           role: 'READ_ONLY',
           isVerified: false
         }
+      });
+    } else if (!dbUser.name && displayName) {
+      // Update existing user's name if it was missing but now available from Supabase
+      dbUser = await prisma.user.update({
+        where: { id: user.id },
+        data: { name: displayName }
       });
     }
 

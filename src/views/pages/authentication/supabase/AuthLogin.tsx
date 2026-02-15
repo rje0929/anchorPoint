@@ -107,7 +107,7 @@ export default function SupabaseLogin({ ...others }) {
             </Alert>
           </Snackbar>
           <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-            <InputLabel htmlFor="outlined-adornment-email-login">Email Address / Username</InputLabel>
+            <InputLabel htmlFor="outlined-adornment-email-login">Email Address</InputLabel>
             <OutlinedInput
               id="outlined-adornment-email-login"
               type="email"

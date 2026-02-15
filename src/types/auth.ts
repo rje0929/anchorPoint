@@ -101,6 +101,7 @@ export type SupabaseContextType = CanRemove & {
   logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
+  resendVerificationEmail: (email: string) => Promise<void>;
 };
 
 export interface InitialLoginContextProps {

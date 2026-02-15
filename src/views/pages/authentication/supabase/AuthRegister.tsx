@@ -6,9 +6,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
@@ -44,7 +42,6 @@ export default function SupabaseRegister({ ...others }) {
   const dispatch = useDispatch();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [checked, setChecked] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [strength, setStrength] = useState(0);
@@ -104,7 +101,7 @@ export default function SupabaseRegister({ ...others }) {
             dispatch(
               openSnackbar({
                 open: true,
-                message: 'Your registration has been successfully completed.',
+                message: 'Registration successful! Please wait for an administrator to approve your account.',
                 variant: 'alert',
                 alert: {
                   color: 'success'
@@ -114,9 +111,7 @@ export default function SupabaseRegister({ ...others }) {
             );
 
             setTimeout(() => {
-              navigate(authParam ? `/check-mail?auth=${authParam}` : '/check-mail', {
-                replace: true
-              });
+              navigate('/pending-verification', { replace: true });
             }, 1500);
           } catch (err: any) {
             console.error(err);
@@ -186,7 +181,7 @@ export default function SupabaseRegister({ ...others }) {
               </Grid>
             </Grid>
             <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-email-register">Email Address / Username</InputLabel>
+              <InputLabel htmlFor="outlined-adornment-email-register">Email Address</InputLabel>
               <OutlinedInput
                 id="outlined-adornment-email-register"
                 type="email"
@@ -253,23 +248,6 @@ export default function SupabaseRegister({ ...others }) {
               </FormControl>
             )}
 
-            <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-              <Grid>
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={checked} onChange={(event) => setChecked(event.target.checked)} name="checked" color="primary" />
-                  }
-                  label={
-                    <Typography variant="subtitle1">
-                      Agree with &nbsp;
-                      <Typography variant="subtitle1" component={Link} to="#">
-                        Terms & Condition.
-                      </Typography>
-                    </Typography>
-                  }
-                />
-              </Grid>
-            </Grid>
             {submitError && (
               <Box sx={{ mt: 3 }}>
                 <Alert severity="error">{submitError}</Alert>

@@ -31,6 +31,7 @@ const SupabaseContext = createContext<SupabaseContextType | null>(null);
 export function SupabseProvider({ children }: { children: ReactElement }) {
   const [state, dispatch] = useReducer(accountReducer, initialState);
   const [dbUser, setDbUser] = useState<DbUserProfile | null>(null);
+  const [isRegistering, setIsRegistering] = useState(false);
 
   // Sync user profile with database
   const syncUserProfile = useCallback(async () => {
@@ -96,7 +97,11 @@ export function SupabseProvider({ children }: { children: ReactElement }) {
           }
         });
       } else if (event === 'SIGNED_IN' && session?.user) {
-        // User just signed in (including via email confirmation link)
+        // Skip auth state changes during registration to prevent race conditions
+        if (isRegistering) {
+          return;
+        }
+
         setSession(session.access_token);
         dispatch({
           type: LOGIN,
@@ -124,7 +129,7 @@ export function SupabseProvider({ children }: { children: ReactElement }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [initialize, syncUserProfile]);
+  }, [initialize, syncUserProfile, isRegistering]);
 
   // LOGIN
   const login = useCallback(
@@ -135,43 +140,62 @@ export function SupabseProvider({ children }: { children: ReactElement }) {
         setDbUser(null);
         console.error(error);
         throw error;
-      } else {
-        setSession(data.session.access_token);
-        dispatch({
-          type: LOGIN,
-          payload: {
-            user: {
-              id: data.user.id,
-              email: data.user.email,
-              name: data.user.user_metadata.display_name
-            },
-            isLoggedIn: true
-          }
-        });
-        // Sync user profile with database after login
-        await syncUserProfile();
       }
+
+      setSession(data.session.access_token);
+      dispatch({
+        type: LOGIN,
+        payload: {
+          user: {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.user_metadata.display_name
+          },
+          isLoggedIn: true
+        }
+      });
+      // Sync user profile with database after login
+      await syncUserProfile();
     },
     [syncUserProfile]
   );
 
   // REGISTER
   const register = useCallback(async (email: string, password: string, firstName: string, lastName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          display_name: `${firstName} ${lastName}`
-        }
-      }
-    });
+    // Set flag to prevent auth state change listener from triggering during registration
+    setIsRegistering(true);
 
-    if (error) {
-      console.error(error);
-      throw error;
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: `${firstName} ${lastName}`
+          },
+          // Skip email confirmation - users will be verified by admin instead
+          emailRedirectTo: undefined
+        }
+      });
+
+      if (error) {
+        console.error(error);
+        throw error;
+      }
+
+      // If we have a session, sync the user to the database immediately
+      // This creates the user record with isVerified: false
+      if (data.session) {
+        setSession(data.session.access_token);
+        await syncUserProfile();
+      }
+
+      // Sign out after registration - user needs admin approval before they can log in
+      await supabase.auth.signOut();
+    } finally {
+      setIsRegistering(false);
     }
-  }, []);
+  }, [syncUserProfile]);
 
   // LOGOUT
   const logout = useCallback(async () => {
@@ -212,6 +236,24 @@ export function SupabseProvider({ children }: { children: ReactElement }) {
     }
   }, []);
 
+  // RESEND VERIFICATION EMAIL
+  const resendVerificationEmail = useCallback(async (email: string) => {
+    // Use VITE_APP_SITE_URL for production, fallback to window.location.origin for local dev
+    const siteUrl = import.meta.env.VITE_APP_SITE_URL || window.location.origin;
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${siteUrl}/login`
+      }
+    });
+
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+  }, []);
+
   // Computed role properties
   const isAdmin = dbUser?.role === 'ADMIN';
   const isVerified = dbUser?.isVerified ?? false;
@@ -229,9 +271,10 @@ export function SupabseProvider({ children }: { children: ReactElement }) {
       register,
       logout,
       forgotPassword,
-      updatePassword
+      updatePassword,
+      resendVerificationEmail
     }),
-    [forgotPassword, login, logout, register, updatePassword, state, dbUser, isAdmin, isVerified, canEdit]
+    [forgotPassword, login, logout, register, updatePassword, resendVerificationEmail, state, dbUser, isAdmin, isVerified, canEdit]
   );
 
   return <SupabaseContext value={memoizedValue}>{children}</SupabaseContext>;

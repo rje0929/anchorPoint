@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 // material-ui
 import { Theme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -25,10 +28,37 @@ import { APP_AUTH } from 'config';
 
 export default function CheckMail() {
   const downMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, resendVerificationEmail } = useAuth();
 
   const [searchParams] = useSearchParams();
   const auth = searchParams.get('auth');
+  const email = searchParams.get('email');
+
+  const [resending, setResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
+
+  const handleResendEmail = async () => {
+    if (!email || !resendVerificationEmail) return;
+
+    setResending(true);
+    setResendError(null);
+    setResendSuccess(false);
+
+    try {
+      await resendVerificationEmail(email);
+      setResendSuccess(true);
+    } catch (err: any) {
+      console.error('Failed to resend verification email:', err);
+      if (err.message?.includes('rate limit') || err.message?.includes('Too Many Requests')) {
+        setResendError('Too many attempts. Please wait a few minutes before trying again.');
+      } else {
+        setResendError(err.message || 'Failed to resend verification email. Please try again.');
+      }
+    } finally {
+      setResending(false);
+    }
+  };
 
   return (
     <AuthWrapper1>
@@ -53,26 +83,53 @@ export default function CheckMail() {
                       </Grid>
                       <Grid size={12}>
                         <Typography variant="caption" sx={{ fontSize: '16px', textAlign: { xs: 'center', md: 'inherit' } }}>
-                          We have sent a password recover instructions to your email.
+                          We have sent a verification link to your email. Please check your inbox and click the link to verify your account.
                         </Typography>
                       </Grid>
                     </Grid>
                   </Grid>
+                  {resendSuccess && (
+                    <Grid size={12}>
+                      <Alert severity="success">
+                        Verification email sent! Please check your inbox.
+                      </Alert>
+                    </Grid>
+                  )}
+                  {resendError && (
+                    <Grid size={12}>
+                      <Alert severity="error">{resendError}</Alert>
+                    </Grid>
+                  )}
+                  {email && (
+                    <Grid size={12}>
+                      <AnimateButton>
+                        <Button
+                          onClick={handleResendEmail}
+                          disabled={resending || resendSuccess}
+                          disableElevation
+                          fullWidth
+                          size="large"
+                          variant="contained"
+                          color="secondary"
+                          startIcon={resending ? <CircularProgress size={20} color="inherit" /> : undefined}
+                        >
+                          {resending ? 'Sending...' : resendSuccess ? 'Email Sent!' : 'Resend Verification Email'}
+                        </Button>
+                      </AnimateButton>
+                    </Grid>
+                  )}
                   <Grid size={12}>
-                    <AnimateButton>
-                      <Button
-                        component={Link}
-                        to={isLoggedIn ? '/pages/login/login3' : auth ? `/${auth}/login?auth=supabase` : '/login'}
-                        disableElevation
-                        fullWidth
-                        size="large"
-                        type="submit"
-                        variant="contained"
-                        color="secondary"
-                      >
-                        Open Mail
-                      </Button>
-                    </AnimateButton>
+                    <Button
+                      component={Link}
+                      to={auth ? `/login?auth=${auth}` : '/login'}
+                      disableElevation
+                      fullWidth
+                      size="large"
+                      variant="outlined"
+                      color="secondary"
+                    >
+                      Back to Login
+                    </Button>
                   </Grid>
                 </Grid>
               </AuthCardWrapper>

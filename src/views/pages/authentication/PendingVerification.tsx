@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 // material-ui
 import { Theme } from '@mui/material/styles';
@@ -15,8 +15,6 @@ import Logo from 'ui-component/Logo';
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import AuthFooter from 'ui-component/cards/AuthFooter';
 
-import useAuth from 'hooks/useAuth';
-
 // assets
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 
@@ -24,17 +22,6 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 
 export default function PendingVerification() {
   const downMD = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'));
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/login', { replace: true });
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
 
   return (
     <AuthWrapper1>
@@ -70,14 +57,15 @@ export default function PendingVerification() {
                   <Grid size={12} sx={{ mt: 3 }}>
                     <AnimateButton>
                       <Button
+                        component={Link}
+                        to="/login"
                         disableElevation
                         fullWidth
                         size="large"
                         variant="contained"
                         color="secondary"
-                        onClick={handleLogout}
                       >
-                        Sign Out
+                        Back to Login
                       </Button>
                     </AnimateButton>
                   </Grid>
