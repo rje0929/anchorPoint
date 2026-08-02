@@ -36,7 +36,7 @@
     "@vitejs/plugin-react": "4.4.1",
     "amazon-cognito-identity-js": "6.3.15",
     "apexcharts": "4.7.0",
-    "axios": "1.9.0",
+    "axios": "^1.18.1",
     "chance": "1.1.12",
     "copy-to-clipboard": "3.3.3",
     "cors": "^2.8.5",
@@ -161,5 +161,16 @@
     "tsx": "^4.20.6",
     "typescript": "5.8.3"
   },
-  "packageManager": "yarn@4.9.1"
+  "packageManager": "yarn@4.9.1",
+  "allowScripts": {
+    "@firebase/util@1.11.0": true,
+    "@mui/x-telemetry@8.0.0": true,
+    "@parcel/watcher@2.5.1": true,
+    "@prisma/client@6.19.0": true,
+    "@prisma/engines@6.19.0": true,
+    "core-js@3.41.0": true,
+    "esbuild@0.25.3": true,
+    "prisma@6.19.0": true,
+    "protobufjs@7.5.0": true
+  }
 }
